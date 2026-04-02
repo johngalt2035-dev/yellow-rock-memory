@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grey Rock Memory — Forensic Communication Archive</title>
+    <meta name="description" content="Executive Assistant communications system with structured message archival, escalation tracking, forensic SHA-256 verification. Works with any AI, any messaging platform.">
+    <style>
+        :root { --bg:#0d1117; --surface:#161b22; --card:#1c2333; --border:#30363d; --accent:#e94560; --green:#4ecca3; --blue:#4361ee; --yellow:#f9c74f; --text:#c9d1d9; --heading:#f0f6fc; --muted:#8b949e; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+        .container{max-width:960px;margin:0 auto;padding:0 24px}
+        a{color:var(--green);text-decoration:none} a:hover{text-decoration:underline}
+        header{padding:70px 0 50px;text-align:center;border-bottom:1px solid var(--border)}
+        header h1{font-size:2.6em;color:var(--heading);letter-spacing:-1px} header h1 span{color:var(--muted);font-weight:400}
+        .ver{color:var(--accent);font-size:.38em;vertical-align:super}
+        header p{color:var(--muted);font-size:1.05em;max-width:650px;margin:12px auto 0}
+        .badges{margin-top:20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+        .badge{display:inline-block;padding:4px 14px;border-radius:16px;font-size:.78em;font-weight:600}
+        .b-r{background:var(--accent);color:#fff} .b-g{background:var(--green);color:#000} .b-b{background:var(--blue);color:#fff} .b-y{background:var(--yellow);color:#000} .b-d{background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+        section{padding:50px 0;border-bottom:1px solid var(--border)} section:last-of-type{border-bottom:none}
+        h2{font-size:1.55em;color:var(--green);margin-bottom:18px} h3{font-size:1.1em;color:var(--yellow);margin:22px 0 10px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:16px}
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;transition:transform .2s,border-color .3s}
+        .card:hover{transform:translateY(-2px);border-color:var(--green)}
+        .card h4{font-size:.95em;color:var(--accent);margin-bottom:6px} .card p{color:var(--muted);font-size:.85em}
+        table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.88em}
+        th,td{padding:9px 14px;text-align:left;border-bottom:1px solid var(--border)}
+        th{background:var(--surface);color:var(--green);font-weight:600} td{color:var(--muted)} td:first-child{color:var(--text)}
+        code{background:var(--surface);padding:2px 6px;border-radius:4px;font-size:.88em;color:var(--green)}
+        .viz{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin:20px 0;overflow:hidden}
+        .viz-label{color:var(--muted);font-size:.72em;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;font-weight:600}
+        .viz svg{width:100%;height:auto;display:block}
+        footer{padding:40px 0;text-align:center;color:var(--muted);font-size:.82em}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+        @keyframes flowRight{0%{transform:translateX(-20px);opacity:0}50%{opacity:1}100%{transform:translateX(20px);opacity:0}}
+        @keyframes flowDown{0%{transform:translateY(-10px);opacity:0}50%{opacity:1}100%{transform:translateY(10px);opacity:0}}
+        @keyframes scaleIn{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
+        @keyframes fillBar{0%{width:0}100%{width:100%}}
+        @keyframes hashScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+        .anim-pulse{animation:pulse 2s ease-in-out infinite}
+        .anim-flow{animation:flowRight 2s ease-in-out infinite}
+        .anim-scale{animation:scaleIn .6s ease-out forwards}
+        @media(max-width:600px){header h1{font-size:1.7em}.grid{grid-template-columns:1fr}.viz svg{min-height:200px}}
+    </style>
+</head>
+<body>
+<div class="container">
+
+<header>
+    <h1>grey-rock<span>-memory</span> <span class="ver">v3.0</span></h1>
+    <p>Executive Assistant communications system with forensic archive, escalation tracking, per-contact routing, and SHA-256 chain of provenance. Any AI. Any platform.</p>
+    <div class="badges">
+        <span class="badge b-r">Forensic Hashing</span>
+        <span class="badge b-b">Escalation Tracking</span>
+        <span class="badge b-g">Per-Contact Routing</span>
+        <span class="badge b-y">Training Facility</span>
+        <span class="badge b-d">17 MCP Tools</span>
+        <span class="badge b-d">37 HTTP Endpoints</span>
+        <span class="badge b-d">25 CLI Commands</span>
+        <span class="badge b-d">SMS</span>
+    </div>
+</header>
+
+<!-- ==================== INSTALL ==================== -->
+<section>
+    <h2>Get Started</h2>
+
+    <div style="background:rgba(67,97,238,0.1);border:1px solid var(--blue);border-radius:10px;padding:18px 22px;margin-bottom:24px;">
+        <h4 style="color:var(--blue);margin-bottom:8px;">🦞 Prerequisite: Install OpenClaw First</h4>
+        <p style="color:var(--muted);font-size:.88em;">Grey Rock Memory requires <a href="https://openclaw.ai">OpenClaw</a> as the orchestration layer. Install OpenClaw first, then choose your installation method below.</p>
+        <p style="color:var(--muted);font-size:.85em;margin-top:8px;"><a href="https://openclaw.ai/docs/install" style="font-weight:600;">→ OpenClaw Installation Guide</a></p>
+    </div>
+
+    <!-- TWO INSTALLATION PATHS -->
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:24px;">
+        <!-- AI INSTALLATION -->
+        <div style="background:var(--surface);border:2px solid var(--blue);border-radius:14px;padding:28px;position:relative;">
+            <div style="position:absolute;top:-14px;left:20px;background:var(--blue);color:#fff;font-weight:800;font-size:.82em;padding:4px 16px;border-radius:12px;">⚡ RECOMMENDED</div>
+            <h3 style="color:var(--blue);margin:8px 0 12px;font-size:1.2em;">AI Installation</h3>
+            <p style="color:var(--text);font-size:.92em;margin-bottom:14px;">Copy-paste <strong>one prompt</strong> into OpenClaw, Claude Code, or ChatGPT — your AI handles everything.</p>
+            <div style="background:var(--bg);border-radius:8px;padding:14px;font-family:monospace;font-size:.78em;color:var(--blue);margin-bottom:14px;line-height:1.6;">
+                Install Grey Rock Memory from<br>
+                github.com/johngalt2035-dev/grey-rock-memory<br><br>
+                Clone, build, install, start the daemon<br>
+                on port 9077, and verify it's running.
+            </div>
+            <p style="color:var(--muted);font-size:.82em;margin-bottom:8px;">Works with: <strong>OpenClaw</strong> (full automation) · <strong>Claude Code</strong> · <strong>ChatGPT</strong></p>
+            <p style="margin-top:12px;"><a href="https://github.com/johngalt2035-dev/grey-rock-memory/blob/main/AI-INSTALL.md" style="background:var(--blue);color:#fff;padding:8px 20px;border-radius:8px;font-weight:600;font-size:.9em;display:inline-block;">AI Installation Guide →</a></p>
+        </div>
+
+        <!-- HUMAN INSTALLATION -->
+        <div style="background:var(--surface);border:2px solid var(--green);border-radius:14px;padding:28px;position:relative;">
+            <div style="position:absolute;top:-14px;left:20px;background:var(--green);color:#000;font-weight:800;font-size:.82em;padding:4px 16px;border-radius:12px;">MANUAL</div>
+            <h3 style="color:var(--green);margin:8px 0 12px;font-size:1.2em;">Human Installation</h3>
+            <p style="color:var(--text);font-size:.92em;margin-bottom:14px;">Step-by-step commands for every platform. Copy, paste, done.</p>
+            <div style="color:var(--muted);font-size:.88em;line-height:1.8;margin-bottom:14px;">
+                <strong style="color:var(--green);">macOS</strong> (Apple Silicon + Intel)<br>
+                <strong style="color:var(--blue);">Windows</strong> (PowerShell + WSL)<br>
+                <strong style="color:var(--yellow);">Ubuntu / Debian</strong><br>
+                <strong style="color:var(--accent);">Fedora / RHEL</strong>
+            </div>
+            <p style="margin-top:12px;"><a href="https://github.com/johngalt2035-dev/grey-rock-memory/blob/main/INSTALL.md" style="background:var(--green);color:#000;padding:8px 20px;border-radius:8px;font-weight:600;font-size:.9em;display:inline-block;">Human Installation Guide →</a></p>
+        </div>
+    </div>
+
+    <!-- QUICK REFERENCE: 3 STEPS -->
+    <h3 style="color:var(--muted);margin-bottom:14px;">Quick Reference: 3 Steps (All Methods)</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;">
+        <!-- Step 1 -->
+        <div style="background:var(--surface);border:1px solid var(--green);border-radius:12px;padding:24px;position:relative;">
+            <div style="position:absolute;top:-14px;left:20px;background:var(--green);color:#000;font-weight:800;font-size:.85em;padding:3px 14px;border-radius:12px;">Step 1</div>
+            <h4 style="color:var(--green);margin:8px 0 10px;font-size:1.05em;">Download &amp; Build</h4>
+            <div style="background:var(--bg);border-radius:6px;padding:12px;font-family:monospace;font-size:.82em;color:var(--green);margin-bottom:8px;">
+                <div style="color:var(--muted);margin-bottom:4px;"># Mac (with Homebrew + Rust)</div>
+                <div>git clone https://github.com/<br>&nbsp;&nbsp;johngalt2035-dev/grey-rock-memory.git</div>
+                <div>cd grey-rock-memory</div>
+                <div>cargo build --release</div>
+                <div style="margin-top:6px;">cp target/release/grey-rock-memory<br>&nbsp;&nbsp;/usr/local/bin/</div>
+            </div>
+            <p style="color:var(--muted);font-size:.8em;">Need Rust? Run: <code style="font-size:.9em;">curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh</code></p>
+        </div>
+
+        <!-- Step 2 -->
+        <div style="background:var(--surface);border:1px solid var(--yellow);border-radius:12px;padding:24px;position:relative;">
+            <div style="position:absolute;top:-14px;left:20px;background:var(--yellow);color:#000;font-weight:800;font-size:.85em;padding:3px 14px;border-radius:12px;">Step 2</div>
+            <h4 style="color:var(--yellow);margin:8px 0 10px;font-size:1.05em;">Start the Memory System</h4>
+            <div style="background:var(--bg);border-radius:6px;padding:12px;font-family:monospace;font-size:.82em;color:var(--yellow);margin-bottom:8px;">
+                <div>grey-rock-memory \</div>
+                <div>&nbsp;&nbsp;--db ~/grey-rock.db \</div>
+                <div>&nbsp;&nbsp;serve --port 9077</div>
+            </div>
+            <p style="color:var(--muted);font-size:.8em;">That's it. It's running. The API is live at <code style="font-size:.9em;">http://localhost:9077</code></p>
+            <p style="color:var(--muted);font-size:.8em;margin-top:4px;">Verify: <code style="font-size:.9em;">curl localhost:9077/api/v1/health</code></p>
+        </div>
+
+        <!-- Step 3 -->
+        <div style="background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:24px;position:relative;">
+            <div style="position:absolute;top:-14px;left:20px;background:var(--accent);color:#fff;font-weight:800;font-size:.85em;padding:3px 14px;border-radius:12px;">Step 3</div>
+            <h4 style="color:var(--accent);margin:8px 0 10px;font-size:1.05em;">Train with Your Data</h4>
+            <div style="background:var(--bg);border-radius:6px;padding:12px;font-family:monospace;font-size:.82em;color:var(--accent);margin-bottom:8px;">
+                <div style="color:var(--muted);margin-bottom:4px;"># Create a file: background.json</div>
+                <div>[</div>
+                <div>&nbsp;&nbsp;{"title": "Schedule",</div>
+                <div>&nbsp;&nbsp;&nbsp;"content": "Conference call at 3pm"},</div>
+                <div>&nbsp;&nbsp;{"title": "Contact info",</div>
+                <div>&nbsp;&nbsp;&nbsp;"content": "Their work: 9-5"}</div>
+                <div>]</div>
+                <div style="margin-top:6px;color:var(--muted);"># Then import it:</div>
+                <div>grey-rock-memory \</div>
+                <div>&nbsp;&nbsp;--db ~/grey-rock.db \</div>
+                <div>&nbsp;&nbsp;train background.json</div>
+            </div>
+            <p style="color:var(--muted);font-size:.8em;">Also works with Markdown files (.md). Done!</p>
+        </div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin-top:20px;">
+        <h4 style="color:var(--blue);margin-bottom:8px;font-size:.95em;">What Just Happened?</h4>
+        <p style="color:var(--muted);font-size:.85em;margin-bottom:6px;"><strong style="color:var(--green);">Step 1</strong> installed the grey-rock-memory program on your computer.</p>
+        <p style="color:var(--muted);font-size:.85em;margin-bottom:6px;"><strong style="color:var(--yellow);">Step 2</strong> started the memory system. It's now listening for your AI assistant to store and retrieve messages.</p>
+        <p style="color:var(--muted);font-size:.85em;margin-bottom:6px;"><strong style="color:var(--accent);">Step 3</strong> loaded background knowledge — schedules, contacts, anything the AI should know about your principal's business context.</p>
+        <p style="color:var(--muted);font-size:.85em;">Now connect it to your AI assistant (ChatGPT, Claude, Grok, Gemini, or Ollama) and your messaging platform (Signal, Telegram, WhatsApp, or SMS). See the <a href="https://github.com/johngalt2035-dev/grey-rock-protocol/blob/main/SETUP.md">full setup guide</a> for details.</p>
+    </div>
+
+    <div style="margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;">
+            <div style="font-size:1.6em;">📦</div>
+            <div style="color:var(--green);font-size:.85em;font-weight:600;margin-top:4px;">Archive Messages</div>
+            <div style="color:var(--muted);font-size:.78em;">Every message stored with SHA-256 hash</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;">
+            <div style="font-size:1.6em;">📊</div>
+            <div style="color:var(--yellow);font-size:.85em;font-weight:600;margin-top:4px;">Track Escalation</div>
+            <div style="color:var(--muted);font-size:.78em;">1-10 score from message patterns</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;">
+            <div style="font-size:1.6em;">📋</div>
+            <div style="color:var(--accent);font-size:.85em;font-weight:600;margin-top:4px;">Daily Digest</div>
+            <div style="color:var(--muted);font-size:.78em;">Logistics only, noise stripped</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;">
+            <div style="font-size:1.6em;">🔒</div>
+            <div style="color:var(--blue);font-size:.85em;font-weight:600;margin-top:4px;">Legal-Ready</div>
+            <div style="color:var(--muted);font-size:.78em;">Forensic archive with hash chain</div>
+        </div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-top:18px;">
+        <h4 style="color:var(--heading);margin-bottom:8px;font-size:.92em;">All Platforms Supported</h4>
+        <p style="color:var(--muted);font-size:.83em;margin-bottom:6px;"><strong style="color:var(--green);">macOS</strong> (Apple Silicon + Intel) &middot; <strong style="color:var(--blue);">Windows</strong> (PowerShell + WSL) &middot; <strong style="color:var(--yellow);">Ubuntu/Debian</strong> &middot; <strong style="color:var(--accent);">Fedora/RHEL</strong></p>
+        <p style="color:var(--muted);font-size:.83em;">Messaging: <strong style="color:var(--text);">Signal</strong> &middot; <strong style="color:var(--text);">Telegram</strong> &middot; <strong style="color:var(--text);">WhatsApp</strong> &middot; <strong style="color:var(--text);">SMS</strong></p>
+        <p style="color:var(--muted);font-size:.83em;">Full install guides: <a href="https://github.com/johngalt2035-dev/grey-rock-memory/blob/main/INSTALL.md">INSTALL.md</a> &middot; AI-assisted: <a href="https://github.com/johngalt2035-dev/grey-rock-memory/blob/main/AI-INSTALL.md">AI-INSTALL.md</a> &middot; 5-min setup: <a href="https://github.com/johngalt2035-dev/grey-rock-memory/blob/main/SETUP.md">SETUP.md</a></p>
+    </div>
+</section>
+
+<!-- ==================== MESSAGE LIFECYCLE ==================== -->
+<section>
+    <h2>System Architecture</h2>
+
+    <div class="viz">
+        <div class="viz-label">Message Lifecycle — Inbound to Archive</div>
+        <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+            <!-- Background grid -->
+            <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e2736" stroke-width=".5"/></pattern>
+                <linearGradient id="gflow" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4ecca3" stop-opacity="0"/><stop offset=".5" stop-color="#4ecca3"/><stop offset="1" stop-color="#4ecca3" stop-opacity="0"/></linearGradient>
+                <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <rect width="900" height="320" fill="url(#grid)"/>
+
+            <!-- Contact -->
+            <rect x="20" y="110" width="140" height="70" rx="10" fill="#1c2333" stroke="#4ecca3" stroke-width="1.5"/>
+            <text x="90" y="140" text-anchor="middle" fill="#4ecca3" font-size="11" font-weight="600">CONTACT</text>
+            <text x="90" y="158" text-anchor="middle" fill="#8b949e" font-size="9">Signal / Telegram</text>
+            <text x="90" y="170" text-anchor="middle" fill="#8b949e" font-size="9">WhatsApp / SMS</text>
+
+            <!-- Flow arrow 1 -->
+            <line x1="160" y1="145" x2="230" y2="145" stroke="#30363d" stroke-width="1.5"/>
+            <circle cx="195" cy="145" r="3" fill="#4ecca3"><animate attributeName="cx" values="165;225" dur="1.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/></circle>
+
+            <!-- AI Agent -->
+            <rect x="230" y="90" width="160" height="110" rx="10" fill="#1c2333" stroke="#4361ee" stroke-width="1.5"/>
+            <text x="310" y="118" text-anchor="middle" fill="#4361ee" font-size="11" font-weight="600">AI ASSISTANT</text>
+            <text x="310" y="136" text-anchor="middle" fill="#8b949e" font-size="9">ChatGPT / Claude</text>
+            <text x="310" y="150" text-anchor="middle" fill="#8b949e" font-size="9">Grok / Gemini / Ollama</text>
+            <text x="310" y="170" text-anchor="middle" fill="#f9c74f" font-size="9" font-weight="600">BIFF Protocol</text>
+            <text x="310" y="186" text-anchor="middle" fill="#8b949e" font-size="8">Grey Rock / Normal</text>
+
+            <!-- Flow arrow 2 -->
+            <line x1="390" y1="130" x2="470" y2="130" stroke="#30363d" stroke-width="1.5"/>
+            <circle cx="430" cy="130" r="3" fill="#e94560"><animate attributeName="cx" values="395;465" dur="1.2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="1.2s" repeatCount="indefinite"/></circle>
+            <text x="430" y="122" text-anchor="middle" fill="#8b949e" font-size="8">1. ARCHIVE</text>
+
+            <!-- Grey Rock Memory -->
+            <rect x="470" y="50" width="200" height="220" rx="12" fill="#0f1923" stroke="#e94560" stroke-width="2"/>
+            <text x="570" y="78" text-anchor="middle" fill="#e94560" font-size="12" font-weight="700">grey-rock-memory</text>
+            <text x="570" y="94" text-anchor="middle" fill="#8b949e" font-size="9">port 9077</text>
+
+            <!-- Inner boxes -->
+            <rect x="486" y="108" width="168" height="32" rx="6" fill="#161b22" stroke="#4ecca3" stroke-width="1"/>
+            <text x="570" y="128" text-anchor="middle" fill="#4ecca3" font-size="9" font-weight="600">SQLite + FTS5 + WAL</text>
+            <rect x="486" y="148" width="80" height="24" rx="4" fill="#161b22" stroke="#30363d"/>
+            <text x="526" y="164" text-anchor="middle" fill="#f9c74f" font-size="8">memories</text>
+            <rect x="574" y="148" width="80" height="24" rx="4" fill="#161b22" stroke="#30363d"/>
+            <text x="614" y="164" text-anchor="middle" fill="#f9c74f" font-size="8">messages</text>
+
+            <!-- SHA-256 hash indicator -->
+            <rect x="486" y="182" width="168" height="22" rx="4" fill="#161b22" stroke="#e94560" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="570" y="197" text-anchor="middle" fill="#e94560" font-size="8" font-weight="600">SHA-256 FORENSIC HASH</text>
+            <rect x="486" y="210" width="168" height="6" rx="3" fill="#1c2333">
+                <animate attributeName="fill" values="#1c2333;#e94560;#1c2333" dur="3s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="486" y="222" width="168" height="22" rx="4" fill="#161b22" stroke="#30363d"/>
+            <text x="570" y="237" text-anchor="middle" fill="#8b949e" font-size="8">contact_id routing</text>
+
+            <!-- Return flow -->
+            <path d="M 390 170 L 470 170" stroke="#30363d" stroke-width="1" stroke-dasharray="4,4"/>
+            <text x="430" y="182" text-anchor="middle" fill="#8b949e" font-size="8">2. RECALL</text>
+            <circle cx="430" cy="170" r="2.5" fill="#4361ee"><animate attributeName="cx" values="465;395" dur="1.4s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="1.4s" repeatCount="indefinite"/></circle>
+
+            <!-- Response back to contact -->
+            <line x1="230" y1="175" x2="160" y2="175" stroke="#30363d" stroke-width="1.5"/>
+            <circle cx="195" cy="175" r="3" fill="#4361ee"><animate attributeName="cx" values="225;165" dur="1.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/></circle>
+            <text x="195" y="195" text-anchor="middle" fill="#4ecca3" font-size="8" font-weight="600">"Got it. 5pm."</text>
+
+            <!-- Labels -->
+            <rect x="700" y="60" width="170" height="200" rx="8" fill="#161b22" stroke="#30363d"/>
+            <text x="785" y="82" text-anchor="middle" fill="#f0f6fc" font-size="10" font-weight="600">Per Message</text>
+            <circle cx="718" cy="102" r="4" fill="#4ecca3"/><text x="728" y="106" fill="#8b949e" font-size="9">1. Archive inbound</text>
+            <circle cx="718" cy="126" r="4" fill="#4361ee"/><text x="728" y="130" fill="#8b949e" font-size="9">2. Recall context</text>
+            <circle cx="718" cy="150" r="4" fill="#e94560"/><text x="728" y="154" fill="#8b949e" font-size="9">3. Compute hash</text>
+            <circle cx="718" cy="174" r="4" fill="#f9c74f"/><text x="728" y="178" fill="#8b949e" font-size="9">4. Check escalation</text>
+            <circle cx="718" cy="198" r="4" fill="#4ecca3"/><text x="728" y="202" fill="#8b949e" font-size="9">5. Draft BIFF response</text>
+            <circle cx="718" cy="222" r="4" fill="#4361ee"/><text x="728" y="226" fill="#8b949e" font-size="9">6. Archive outbound</text>
+        </svg>
+    </div>
+
+    <!-- ==================== ESCALATION SCORING ==================== -->
+    <div class="viz">
+        <div class="viz-label">Escalation Scoring Engine</div>
+        <svg viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg">
+            <rect width="900" height="280" fill="url(#grid)"/>
+
+            <!-- Input -->
+            <rect x="20" y="100" width="130" height="60" rx="8" fill="#1c2333" stroke="#4ecca3" stroke-width="1.5"/>
+            <text x="85" y="125" text-anchor="middle" fill="#4ecca3" font-size="10" font-weight="600">Message Archive</text>
+            <text x="85" y="142" text-anchor="middle" fill="#8b949e" font-size="8">All messages for contact</text>
+
+            <!-- Arrow to analysis -->
+            <line x1="150" y1="130" x2="200" y2="130" stroke="#4ecca3" stroke-width="1.5"/>
+            <polygon points="198,126 206,130 198,134" fill="#4ecca3"/>
+
+            <!-- Analysis boxes -->
+            <rect x="210" y="30" width="140" height="70" rx="8" fill="#1c2333" stroke="#f9c74f" stroke-width="1.5"/>
+            <text x="280" y="52" text-anchor="middle" fill="#f9c74f" font-size="10" font-weight="600">Volume Factor</text>
+            <text x="280" y="68" text-anchor="middle" fill="#8b949e" font-size="8">1h: ≥10 → +3</text>
+            <text x="280" y="80" text-anchor="middle" fill="#8b949e" font-size="8">1h: ≥5 → +2</text>
+            <text x="280" y="92" text-anchor="middle" fill="#8b949e" font-size="8">1h: ≥3 → +1</text>
+
+            <rect x="210" y="110" width="140" height="60" rx="8" fill="#1c2333" stroke="#e94560" stroke-width="1.5"/>
+            <text x="280" y="132" text-anchor="middle" fill="#e94560" font-size="10" font-weight="600">Noise Ratio</text>
+            <text x="280" y="148" text-anchor="middle" fill="#8b949e" font-size="8">&gt;80% NOISE → +2</text>
+            <text x="280" y="160" text-anchor="middle" fill="#8b949e" font-size="8">&gt;50% NOISE → +1</text>
+
+            <rect x="210" y="180" width="140" height="60" rx="8" fill="#1c2333" stroke="#4361ee" stroke-width="1.5"/>
+            <text x="280" y="202" text-anchor="middle" fill="#4361ee" font-size="10" font-weight="600">Alert Count</text>
+            <text x="280" y="218" text-anchor="middle" fill="#8b949e" font-size="8">≥3 alerts/24h → +3</text>
+            <text x="280" y="230" text-anchor="middle" fill="#8b949e" font-size="8">≥1 alert/24h → +2</text>
+
+            <!-- Convergence arrows -->
+            <line x1="350" y1="65" x2="420" y2="130" stroke="#30363d" stroke-width="1"/>
+            <line x1="350" y1="140" x2="420" y2="130" stroke="#30363d" stroke-width="1"/>
+            <line x1="350" y1="210" x2="420" y2="130" stroke="#30363d" stroke-width="1"/>
+
+            <!-- Composite -->
+            <rect x="420" y="95" width="130" height="70" rx="10" fill="#0f1923" stroke="#f0f6fc" stroke-width="2"/>
+            <text x="485" y="120" text-anchor="middle" fill="#f0f6fc" font-size="11" font-weight="700">COMPOSITE</text>
+            <text x="485" y="138" text-anchor="middle" fill="#f9c74f" font-size="10">Score 1-10</text>
+            <text x="485" y="155" text-anchor="middle" fill="#8b949e" font-size="8">+ avg per-msg × 0.3</text>
+
+            <!-- Arrow to output -->
+            <line x1="550" y1="130" x2="600" y2="130" stroke="#f0f6fc" stroke-width="1.5"/>
+            <polygon points="598,126 606,130 598,134" fill="#f0f6fc"/>
+
+            <!-- Output levels -->
+            <rect x="610" y="30" width="260" height="220" rx="10" fill="#1c2333" stroke="#30363d" stroke-width="1"/>
+            <text x="740" y="55" text-anchor="middle" fill="#f0f6fc" font-size="11" font-weight="600">Escalation Levels</text>
+
+            <!-- Level bars animated -->
+            <rect x="630" y="72" width="220" height="28" rx="6" fill="#161b22"/>
+            <rect x="630" y="72" width="88" height="28" rx="6" fill="#4ecca3" opacity=".8"><animate attributeName="width" values="0;88" dur="1.5s" fill="freeze"/></rect>
+            <text x="640" y="90" fill="#000" font-size="10" font-weight="600">1-4 ROUTINE</text>
+
+            <rect x="630" y="108" width="220" height="28" rx="6" fill="#161b22"/>
+            <rect x="630" y="108" width="132" height="28" rx="6" fill="#f9c74f" opacity=".8"><animate attributeName="width" values="0;132" dur="1.8s" fill="freeze"/></rect>
+            <text x="640" y="126" fill="#000" font-size="10" font-weight="600">5-6 ELEVATED</text>
+
+            <rect x="630" y="144" width="220" height="28" rx="6" fill="#161b22"/>
+            <rect x="630" y="144" width="176" height="28" rx="6" fill="#e94560" opacity=".8"><animate attributeName="width" values="0;176" dur="2.1s" fill="freeze"/></rect>
+            <text x="640" y="162" fill="#fff" font-size="10" font-weight="600">7-8 HIGH</text>
+
+            <rect x="630" y="180" width="220" height="28" rx="6" fill="#161b22"/>
+            <rect x="630" y="180" width="220" height="28" rx="6" fill="#e94560"><animate attributeName="opacity" values=".6;1;.6" dur="1s" repeatCount="indefinite"/></rect>
+            <text x="640" y="198" fill="#fff" font-size="10" font-weight="700">9-10 CRITICAL</text>
+
+            <text x="740" y="228" text-anchor="middle" fill="#8b949e" font-size="8">Time windows: 1h, 6h, 24h, 7d</text>
+        </svg>
+    </div>
+
+    <!-- ==================== FORENSIC CHAIN ==================== -->
+    <div class="viz">
+        <div class="viz-label">Three-Layer SHA-256 Forensic Verification</div>
+        <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg">
+            <rect width="900" height="300" fill="url(#grid)"/>
+
+            <!-- Layer 1 -->
+            <rect x="20" y="30" width="260" height="240" rx="10" fill="#1c2333" stroke="#4ecca3" stroke-width="2"/>
+            <text x="150" y="55" text-anchor="middle" fill="#4ecca3" font-size="11" font-weight="700">LAYER 1: In-Database</text>
+            <text x="150" y="72" text-anchor="middle" fill="#8b949e" font-size="8">Per-row forensic_hash column</text>
+
+            <!-- Animated hash rows -->
+            <g>
+                <rect x="36" y="88" width="228" height="22" rx="4" fill="#161b22" stroke="#30363d"/>
+                <text x="44" y="103" fill="#4ecca3" font-size="8" font-family="monospace">msg-001</text>
+                <text x="100" y="103" fill="#e94560" font-size="7" font-family="monospace">a3f8c2e1d7b9...</text>
+                <circle cx="254" cy="99" r="5" fill="#4ecca3"><animate attributeName="r" values="3;5;3" dur="2s" repeatCount="indefinite"/></circle>
+            </g>
+            <g>
+                <rect x="36" y="116" width="228" height="22" rx="4" fill="#161b22" stroke="#30363d"/>
+                <text x="44" y="131" fill="#4ecca3" font-size="8" font-family="monospace">msg-002</text>
+                <text x="100" y="131" fill="#e94560" font-size="7" font-family="monospace">7d2f91bc04e5...</text>
+                <circle cx="254" cy="127" r="5" fill="#4ecca3"><animate attributeName="r" values="3;5;3" dur="2s" begin=".3s" repeatCount="indefinite"/></circle>
+            </g>
+            <g>
+                <rect x="36" y="144" width="228" height="22" rx="4" fill="#161b22" stroke="#30363d"/>
+                <text x="44" y="159" fill="#4ecca3" font-size="8" font-family="monospace">msg-003</text>
+                <text x="100" y="159" fill="#e94560" font-size="7" font-family="monospace">f1e8a3b7c9d2...</text>
+                <circle cx="254" cy="155" r="5" fill="#4ecca3"><animate attributeName="r" values="3;5;3" dur="2s" begin=".6s" repeatCount="indefinite"/></circle>
+            </g>
+
+            <text x="150" y="186" text-anchor="middle" fill="#f9c74f" font-size="9" font-weight="600">H(id | sender | timestamp</text>
+            <text x="150" y="200" text-anchor="middle" fill="#f9c74f" font-size="9" font-weight="600">| raw_content | category)</text>
+
+            <rect x="36" y="216" width="228" height="36" rx="6" fill="#0f1923" stroke="#4ecca3" stroke-dasharray="4,4"/>
+            <text x="150" y="234" text-anchor="middle" fill="#4ecca3" font-size="9" font-weight="600">verify-db → ALL HASHES VALID</text>
+            <text x="150" y="248" text-anchor="middle" fill="#8b949e" font-size="7">Tamper → exact message ID reported</text>
+
+            <!-- Arrow L1 → L2 -->
+            <line x1="280" y1="150" x2="320" y2="150" stroke="#f9c74f" stroke-width="2"/>
+            <polygon points="318,145 328,150 318,155" fill="#f9c74f"/>
+            <circle cx="300" cy="150" r="3" fill="#f9c74f"><animate attributeName="cx" values="285;315" dur="1s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="1s" repeatCount="indefinite"/></circle>
+
+            <!-- Layer 2 -->
+            <rect x="330" y="30" width="260" height="240" rx="10" fill="#1c2333" stroke="#f9c74f" stroke-width="2"/>
+            <text x="460" y="55" text-anchor="middle" fill="#f9c74f" font-size="11" font-weight="700">LAYER 2: Archive File</text>
+            <text x="460" y="72" text-anchor="middle" fill="#8b949e" font-size="8">ForensicArchive.json</text>
+
+            <rect x="346" y="88" width="228" height="46" rx="6" fill="#161b22" stroke="#30363d"/>
+            <text x="460" y="106" text-anchor="middle" fill="#8b949e" font-size="8">Per-message hashes (copied)</text>
+            <text x="460" y="122" text-anchor="middle" fill="#e94560" font-size="7" font-family="monospace">hash0 + hash1 + hash2 + ...</text>
+
+            <rect x="370" y="142" width="20" height="20" rx="2" fill="none" stroke="#f9c74f" stroke-width="1"><animate attributeName="stroke-opacity" values="1;.3;1" dur="1.5s" repeatCount="indefinite"/></rect>
+            <text x="396" y="156" fill="#f9c74f" font-size="9" font-weight="600">chain_hash = H(all message hashes)</text>
+
+            <rect x="370" y="172" width="20" height="20" rx="2" fill="none" stroke="#e94560" stroke-width="1"><animate attributeName="stroke-opacity" values="1;.3;1" dur="1.5s" begin=".5s" repeatCount="indefinite"/></rect>
+            <text x="396" y="186" fill="#e94560" font-size="9" font-weight="600">archive_hash = H(chain | time | count)</text>
+
+            <rect x="346" y="206" width="228" height="46" rx="6" fill="#0f1923" stroke="#f9c74f" stroke-dasharray="4,4"/>
+            <text x="460" y="224" text-anchor="middle" fill="#f9c74f" font-size="9" font-weight="600">verify-archive → VALID</text>
+            <text x="460" y="240" text-anchor="middle" fill="#8b949e" font-size="7">Tampered? → REJECTED on import</text>
+
+            <!-- Arrow L2 → L3 -->
+            <line x1="590" y1="150" x2="630" y2="150" stroke="#e94560" stroke-width="2"/>
+            <polygon points="628,145 638,150 628,155" fill="#e94560"/>
+            <circle cx="610" cy="150" r="3" fill="#e94560"><animate attributeName="cx" values="595;625" dur="1s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="1s" repeatCount="indefinite"/></circle>
+
+            <!-- Layer 3 -->
+            <rect x="640" y="30" width="240" height="240" rx="10" fill="#1c2333" stroke="#e94560" stroke-width="2"/>
+            <text x="760" y="55" text-anchor="middle" fill="#e94560" font-size="11" font-weight="700">LAYER 3: Full Cycle</text>
+            <text x="760" y="72" text-anchor="middle" fill="#8b949e" font-size="8">Complete chain of provenance</text>
+
+            <!-- Cycle diagram -->
+            <g transform="translate(760,160)">
+                <circle r="55" fill="none" stroke="#30363d" stroke-width="1.5"/>
+                <!-- Rotating dot -->
+                <circle cx="0" cy="-55" r="5" fill="#e94560" filter="url(#glow)"><animateTransform attributeName="transform" type="rotate" values="0;360" dur="4s" repeatCount="indefinite"/></circle>
+                <text y="-30" text-anchor="middle" fill="#4ecca3" font-size="8" font-weight="600">ARCHIVE</text>
+                <text y="-2" text-anchor="middle" fill="#f9c74f" font-size="8" font-weight="600">VERIFY</text>
+                <text y="18" text-anchor="middle" fill="#e94560" font-size="8" font-weight="600">PURGE</text>
+                <text y="38" text-anchor="middle" fill="#4361ee" font-size="8" font-weight="600">REIMPORT</text>
+            </g>
+
+            <text x="760" y="238" text-anchor="middle" fill="#8b949e" font-size="8">365-day retention</text>
+            <text x="760" y="252" text-anchor="middle" fill="#8b949e" font-size="8">Legal-ready documentation</text>
+        </svg>
+    </div>
+
+    <!-- ==================== THREE-TIER MEMORY ==================== -->
+    <div class="viz">
+        <div class="viz-label">Three-Tier Memory System</div>
+        <svg viewBox="0 0 900 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="900" height="200" fill="url(#grid)"/>
+
+            <!-- Short -->
+            <rect x="40" y="40" width="220" height="120" rx="10" fill="#1c2333" stroke="#e94560" stroke-width="1.5"/>
+            <rect x="40" y="40" width="220" height="28" rx="10" fill="#e94560" opacity=".15"/>
+            <text x="150" y="58" text-anchor="middle" fill="#e94560" font-size="11" font-weight="700">SHORT</text>
+            <text x="150" y="82" text-anchor="middle" fill="#f0f6fc" font-size="10">6-hour TTL</text>
+            <text x="150" y="100" text-anchor="middle" fill="#8b949e" font-size="9">Today's messages</text>
+            <text x="150" y="118" text-anchor="middle" fill="#8b949e" font-size="9">Session context</text>
+            <text x="150" y="140" text-anchor="middle" fill="#4ecca3" font-size="8">+1h on each access</text>
+            <!-- Decay animation -->
+            <rect x="56" y="148" width="188" height="4" rx="2" fill="#161b22"/>
+            <rect x="56" y="148" height="4" rx="2" fill="#e94560"><animate attributeName="width" values="188;40;188" dur="6s" repeatCount="indefinite"/></rect>
+
+            <!-- Arrow Short → Mid -->
+            <line x1="260" y1="100" x2="330" y2="100" stroke="#f9c74f" stroke-width="2"/>
+            <polygon points="328,95 340,100 328,105" fill="#f9c74f"/>
+            <text x="295" y="90" text-anchor="middle" fill="#f9c74f" font-size="9" font-weight="700">5x</text>
+            <text x="295" y="120" text-anchor="middle" fill="#8b949e" font-size="7">auto-promote</text>
+
+            <!-- Mid -->
+            <rect x="340" y="40" width="220" height="120" rx="10" fill="#1c2333" stroke="#f9c74f" stroke-width="1.5"/>
+            <rect x="340" y="40" width="220" height="28" rx="10" fill="#f9c74f" opacity=".15"/>
+            <text x="450" y="58" text-anchor="middle" fill="#f9c74f" font-size="11" font-weight="700">MID</text>
+            <text x="450" y="82" text-anchor="middle" fill="#f0f6fc" font-size="10">7-day TTL</text>
+            <text x="450" y="100" text-anchor="middle" fill="#8b949e" font-size="9">This week's patterns</text>
+            <text x="450" y="118" text-anchor="middle" fill="#8b949e" font-size="9">Working knowledge</text>
+            <text x="450" y="140" text-anchor="middle" fill="#4ecca3" font-size="8">+1d on each access</text>
+            <rect x="356" y="148" width="188" height="4" rx="2" fill="#161b22"/>
+            <rect x="356" y="148" height="4" rx="2" fill="#f9c74f"><animate attributeName="width" values="188;80;188" dur="10s" repeatCount="indefinite"/></rect>
+
+            <!-- Arrow Mid → Long -->
+            <line x1="560" y1="100" x2="630" y2="100" stroke="#4ecca3" stroke-width="2"/>
+            <polygon points="628,95 640,100 628,105" fill="#4ecca3"/>
+            <text x="595" y="90" text-anchor="middle" fill="#4ecca3" font-size="9" font-weight="700">5x</text>
+            <text x="595" y="120" text-anchor="middle" fill="#8b949e" font-size="7">auto-promote</text>
+
+            <!-- Long -->
+            <rect x="640" y="40" width="220" height="120" rx="10" fill="#1c2333" stroke="#4ecca3" stroke-width="2"/>
+            <rect x="640" y="40" width="220" height="28" rx="10" fill="#4ecca3" opacity=".15"/>
+            <text x="750" y="58" text-anchor="middle" fill="#4ecca3" font-size="11" font-weight="700">LONG</text>
+            <text x="750" y="82" text-anchor="middle" fill="#f0f6fc" font-size="10">Permanent</text>
+            <text x="750" y="100" text-anchor="middle" fill="#8b949e" font-size="9">Core facts &amp; training</text>
+            <text x="750" y="118" text-anchor="middle" fill="#8b949e" font-size="9">Legal records</text>
+            <text x="750" y="140" text-anchor="middle" fill="#4ecca3" font-size="8">Never expires</text>
+            <rect x="656" y="148" width="188" height="4" rx="2" fill="#4ecca3" opacity=".5"/>
+
+            <!-- Train arrow -->
+            <line x1="750" y1="170" x2="750" y2="195" stroke="#4361ee" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="750" y="195" text-anchor="middle" fill="#4361ee" font-size="8" font-weight="600">↑ train (JSON / Markdown)</text>
+        </svg>
+    </div>
+</section>
+
+<!-- ==================== FEATURES ==================== -->
+<section>
+    <h2>Features</h2>
+    <div class="grid">
+        <div class="card"><h4>Shadow Logging</h4><p>4 categories: LOGISTICS, NOISE, ESCALATION_ALERT, ACTION_REQUIRED. Full-text searchable via FTS5.</p></div>
+        <div class="card"><h4>Escalation Tracking</h4><p>1-10 composite scoring. Volume + noise ratio + alerts + per-message score across 1h/6h/24h/7d windows.</p></div>
+        <div class="card"><h4>Per-Contact Routing</h4><p>contact_id field routes messages, escalation, and digests independently per individual.</p></div>
+        <div class="card"><h4>Training Facility</h4><p>Bulk import from JSON or Markdown. Background knowledge stored as permanent long-term memories.</p></div>
+        <div class="card"><h4>Forensic Hashing</h4><p>SHA-256 per-row at INSERT. Three-layer verification: row → chain → archive. Tamper detection.</p></div>
+        <div class="card"><h4>Legal Archive</h4><p>1-year retention. Forensic JSON export. Verified import. Legal-ready chain of provenance.</p></div>
+        <div class="card"><h4>6-Factor Recall</h4><p>FTS relevance + priority + access frequency + confidence + tier boost + recency decay.</p></div>
+        <div class="card"><h4>LLM Agnostic</h4><p>Works with OpenAI, Claude, Grok, Gemini, Ollama. HTTP API consumed by any provider.</p></div>
+    </div>
+</section>
+
+<!-- ==================== API ==================== -->
+<section>
+    <h2>API Reference</h2>
+    <h3>Grey Rock Endpoints</h3>
+    <table>
+        <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td>POST</td><td>/api/v1/train</td><td>Bulk training import (JSON array)</td></tr>
+            <tr><td>POST</td><td>/api/v1/messages</td><td>Archive message with forensic hash + contact_id</td></tr>
+            <tr><td>GET</td><td>/api/v1/messages/export</td><td>Legal export (sender, contact_id, since)</td></tr>
+            <tr><td>GET</td><td>/api/v1/messages/verify</td><td>Verify forensic integrity of all DB rows</td></tr>
+            <tr><td>POST</td><td>/api/v1/messages/purge</td><td>Purge messages older than retention period</td></tr>
+            <tr><td>GET</td><td>/api/v1/escalation</td><td>Escalation score by sender or contact_id</td></tr>
+            <tr><td>GET</td><td>/api/v1/digest</td><td>Logistics-only digest by sender or contact_id</td></tr>
+            <tr><td>GET</td><td>/api/v1/archive</td><td>Create forensic archive with SHA-256 chain</td></tr>
+            <tr><td>POST</td><td>/api/v1/archive/verify</td><td>Verify archive hash integrity</td></tr>
+            <tr><td>POST</td><td>/api/v1/archive/import</td><td>Import verified archive (rejects tampered)</td></tr>
+        </tbody>
+    </table>
+    <h3>Core Memory</h3>
+    <table>
+        <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td>POST</td><td>/api/v1/memories</td><td>Create memory</td></tr>
+            <tr><td>GET</td><td>/api/v1/memories</td><td>List with filters</td></tr>
+            <tr><td>GET/POST</td><td>/api/v1/recall</td><td>Fuzzy ranked recall</td></tr>
+            <tr><td>GET</td><td>/api/v1/search</td><td>FTS5 keyword search</td></tr>
+            <tr><td>GET</td><td>/api/v1/stats</td><td>Statistics + archivable count</td></tr>
+            <tr><td>GET</td><td>/api/v1/health</td><td>Health check</td></tr>
+        </tbody>
+    </table>
+    <h3>Draft Management</h3>
+    <table>
+        <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td>POST</td><td>/api/v1/drafts</td><td>Create draft with SHA-256 hash</td></tr>
+            <tr><td>GET</td><td>/api/v1/drafts</td><td>List drafts (filter: contact, status, since)</td></tr>
+            <tr><td>GET</td><td>/api/v1/drafts/{id}</td><td>Get draft by ID</td></tr>
+            <tr><td>PUT</td><td>/api/v1/drafts/{id}/approve</td><td>Approve with reviewer chain</td></tr>
+            <tr><td>PUT</td><td>/api/v1/drafts/{id}/reject</td><td>Reject with reason</td></tr>
+            <tr><td>PUT</td><td>/api/v1/drafts/{id}/send</td><td>Mark sent (zero deviation check)</td></tr>
+            <tr><td>GET</td><td>/api/v1/drafts/{id}/verify</td><td>Verify complete hash chain</td></tr>
+        </tbody>
+    </table>
+    <p style="color:var(--muted);font-size:.85em;margin-top:12px;">17 MCP tools &middot; 37 HTTP endpoints &middot; 25 CLI commands</p>
+</section>
+
+<!-- ==================== CAPABILITY MATRIX ==================== -->
+<section>
+    <h2>Capability Matrix</h2>
+    <table>
+        <thead><tr><th>Capability</th><th>Status</th><th>Details</th></tr></thead>
+        <tbody>
+            <tr><td>Shadow Logging</td><td>4 categories</td><td>LOGISTICS, NOISE, ESCALATION_ALERT, ACTION_REQUIRED</td></tr>
+            <tr><td>Per-Contact Routing</td><td>contact_id</td><td>Independent escalation, digest, archive per individual</td></tr>
+            <tr><td>Escalation Scoring</td><td>1-10 scale</td><td>Volume + noise ratio + alerts + per-message avg</td></tr>
+            <tr><td>Forensic Hash (DB)</td><td>SHA-256/row</td><td>Computed at INSERT, verified via verify-db</td></tr>
+            <tr><td>Forensic Archive</td><td>3-layer SHA-256</td><td>Per-message + chain + archive hash</td></tr>
+            <tr><td>Archive Import</td><td>Verified only</td><td>Rejects tampered archives</td></tr>
+            <tr><td>Retention Policy</td><td>365 days</td><td>Configurable MESSAGE_RETENTION_DAYS</td></tr>
+            <tr><td>Configurable Retention</td><td>365-2555+ days</td><td>Regulatory presets: CCPA, EEOC, SEC, SOX, IRS, litigation hold</td></tr>
+            <tr><td>Training Facility</td><td>JSON + Markdown</td><td>Bulk import to long-term memory</td></tr>
+            <tr><td>3-Tier Memory</td><td>Short/Mid/Long</td><td>Auto-promotion, TTL, recency decay</td></tr>
+            <tr><td>LLM Support</td><td>Any provider</td><td>OpenAI, Claude, Grok, Gemini, Ollama</td></tr>
+            <tr><td>Communication Styles</td><td>Personal + Executive</td><td>Per-contact style with training data</td></tr>
+            <tr><td>Platform Support</td><td>Any channel</td><td>Signal, Telegram, WhatsApp, SMS</td></tr>
+            <tr><td>Draft Management</td><td>7 endpoints</td><td>Create, approve, reject, send, verify drafts with forensic signing</td></tr>
+            <tr><td>Zero Deviation Enforcement</td><td>SHA-256 verified</td><td>Sent content must match approved content character-for-character or send is BLOCKED</td></tr>
+            <tr><td>Reviewer Chain</td><td>JSON audit trail</td><td>Sequential reviewer actions with timestamps for multi-reviewer workflows</td></tr>
+            <tr><td>MCP Tools</td><td>17 tools</td><td>stdio JSON-RPC</td></tr>
+            <tr><td>HTTP API</td><td>37 endpoints</td><td>REST on configurable port</td></tr>
+            <tr><td>CLI</td><td>25 commands</td><td>Full command-line interface</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ==================== INSTALLATION ==================== -->
+<section>
+    <h2>Installation</h2>
+    <p style="color:var(--muted);margin-bottom:16px;">Two paths to get started. Pick the one that fits you. For full automation, install <a href="https://openclaw.ai">OpenClaw</a> first.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+        <div class="card">
+            <h4>Human Installation</h4>
+            <p>Step-by-step for macOS, Windows, Ubuntu, Fedora. <a href="https://github.com/johngalt2035-dev/grey-rock-memory/blob/main/INSTALL.md">INSTALL.md</a></p>
+        </div>
+        <div class="card">
+            <h4>AI Installation</h4>
+            <p>Copy-paste one prompt into OpenClaw, Claude Code, or ChatGPT. <a href="https://github.com/johngalt2035-dev/grey-rock-memory/blob/main/AI-INSTALL.md">AI-INSTALL.md</a></p>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== SYMBIOTIC SYSTEM ==================== -->
+<section>
+    <h2>Symbiotic System</h2>
+    <p style="color:var(--muted);margin-bottom:14px;">Grey Rock Memory is one half of a symbiotic system. It provides the data backbone while <a href="https://johngalt2035-dev.github.io/grey-rock-protocol/">Grey Rock Protocol</a> provides the communication rules. Both are built upon <a href="https://openclaw.ai">OpenClaw</a>.</p>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="card" style="border-color:#e94560;"><h4 style="color:#e94560;">Grey Rock Memory</h4><p>Forensic archive. Escalation scoring. Training facility. SHA-256 chain. Per-contact routing. SQLite + FTS5.</p></div>
+        <div class="card" style="border-color:#4ecca3;"><h4 style="color:#4ecca3;">Grey Rock Protocol</h4><p>BIFF templates. Anti-JADE/DARVO. Cluster B patterns. Legal framework. Escalation management. Emergency triage.</p></div>
+        <div class="card" style="border-color:#4361ee;"><h4 style="color:#4361ee;">OpenClaw</h4><p>Multi-agent orchestration. Channel routing (Signal, Telegram, WhatsApp, SMS). Cron scheduling. LLM provider management.</p></div>
+    </div>
+    <p style="color:var(--muted);font-size:.85em;margin-top:14px;"><strong>Data flow:</strong> Contact → OpenClaw (channel) → AI Agent (protocol) → Grey Rock Memory (archive + recall) → AI Agent (BIFF response) → OpenClaw (delivery) → Contact</p>
+</section>
+
+<!-- ==================== LEGAL ==================== -->
+<section style="border-bottom:none;">
+    <div style="background:rgba(233,69,96,0.06);border:1px solid rgba(233,69,96,0.3);border-radius:8px;padding:20px;margin:16px 0;">
+        <h4 style="color:var(--accent);margin-bottom:8px;">Important Legal Notices</h4>
+        <p style="color:var(--muted);font-size:.85em;margin-bottom:8px;">This software is provided "AS IS" under the <a href="https://github.com/johngalt2035-dev/grey-rock-memory/blob/main/LICENSE">MIT License</a>, without warranty of any kind. The authors accept <strong>zero liability</strong> for any use, misuse, legal outcome, or consequence.</p>
+        <p style="color:var(--muted);font-size:.85em;margin-bottom:8px;"><strong>Not legal advice.</strong> Forensic features are technical tools only — do not guarantee court admissibility. Consult a licensed attorney.</p>
+        <p style="color:var(--muted);font-size:.85em;margin-bottom:8px;"><strong>For professional use.</strong> Designed for Executive Assistants managing communications with high-conflict individuals, groups, or business entities.</p>
+        <p style="color:var(--muted);font-size:.85em;">See <a href="https://github.com/johngalt2035-dev/grey-rock-memory/blob/main/LEGAL_DISCLAIMER.md">LEGAL_DISCLAIMER.md</a> for complete terms.</p>
+    </div>
+</section>
+
+<footer>
+    <p style="margin-bottom:8px;">
+        <a href="https://github.com/johngalt2035-dev/grey-rock-memory">GitHub</a> &middot;
+        <a href="https://github.com/johngalt2035-dev/grey-rock-protocol">Grey Rock Protocol</a> &middot;
+        <a href="https://openclaw.ai">OpenClaw</a> &middot;
+        <a href="https://github.com/johngalt2035-dev/grey-rock-protocol/blob/main/SETUP.md">Setup Guide</a> &middot;
+        <a href="https://github.com/johngalt2035-dev/grey-rock-memory/blob/main/LICENSE">MIT License</a> &middot;
+        <a href="https://github.com/johngalt2035-dev/grey-rock-memory/blob/main/LEGAL_DISCLAIMER.md">Legal</a>
+    </p>
+    <p style="font-size:.78em;color:#8b949e;margin-top:10px;">
+        <span style="font-size:1.4em;vertical-align:middle;">🦞</span>
+        Built upon <a href="https://openclaw.ai">OpenClaw</a> — multi-agent orchestration platform
+    </p>
+    <p style="font-size:.78em;color:#8b949e;margin-top:8px;">
+    </p>
+    <p style="font-size:.72em;color:#555;max-width:700px;margin:8px auto 0;">
+        MIT License. PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. Zero liability for any use or misuse. Not legal advice. See LEGAL_DISCLAIMER.md for complete terms. By using this software you agree to the MIT License and assume all risk.
+    </p>
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1830 @@
+// Grey Rock Memory — Forensic Communication Archive
+// Copyright (c) 2026 johngalt2035-dev. All rights reserved.
+// Created by johngalt2035-dev + Anthropic Claude AI Code
+//
+// Licensed under the MIT License. See LICENSE file in the project root.
+//
+// DISCLAIMER: This software is provided "AS IS", without warranty of any kind.
+// Not legal advice. See LEGAL_DISCLAIMER.md for complete terms.
+
+// Integration tests — all run through the CLI binary
+
+#[test]
+fn test_cli_store_and_recall() {
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-cli-test-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+
+    // Store
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-t",
+            "long",
+            "-n",
+            "test-project",
+            "-T",
+            "Rust is great",
+            "--content",
+            "Rust provides memory safety without garbage collection",
+            "--tags",
+            "rust,language",
+            "-p",
+            "8",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "store failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stored: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(stored["tier"], "long");
+    assert_eq!(stored["namespace"], "test-project");
+
+    // Recall
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "recall",
+            "Rust memory safety",
+            "-n",
+            "test-project",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "recall failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let recalled: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(recalled["count"].as_u64().unwrap() >= 1);
+
+    // Search
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "search",
+            "Rust",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let searched: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(searched["count"].as_u64().unwrap() >= 1);
+
+    // List
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "list"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let listed: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(listed["count"].as_u64().unwrap() >= 1);
+
+    // Stats
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "stats"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let stats: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(stats["total"].as_u64().unwrap() >= 1);
+
+    // Namespaces
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "namespaces"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let ns: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(!ns["namespaces"].as_array().unwrap().is_empty());
+
+    // Export
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "export"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let exported: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(exported["count"].as_u64().unwrap() >= 1);
+
+    // Delete
+    let id = stored["id"].as_str().unwrap();
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "delete", id])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    // Cleanup
+    let _ = std::fs::remove_file(&db_path);
+}
+
+#[test]
+fn test_deduplication() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-dedup-test-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    // Store same title+namespace twice
+    for content in ["first version", "second version"] {
+        let output = std::process::Command::new(binary)
+            .args([
+                "--db",
+                db_path.to_str().unwrap(),
+                "--json",
+                "store",
+                "-T",
+                "same title",
+                "-n",
+                "same-ns",
+                "--content",
+                content,
+                "-p",
+                "5",
+            ])
+            .output()
+            .unwrap();
+        assert!(output.status.success());
+    }
+
+    // Should only have 1 memory (deduped)
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "stats"])
+        .output()
+        .unwrap();
+    let stats: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(
+        stats["total"].as_u64().unwrap(),
+        1,
+        "deduplication failed — expected 1 memory"
+    );
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+#[test]
+fn test_gc_removes_expired() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-gc-test-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    // Store a short-term memory (6h TTL) — we can't easily test real expiry,
+    // but we can verify gc runs without error
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-t",
+            "short",
+            "-T",
+            "ephemeral thought",
+            "--content",
+            "goes away",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "gc"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let gc: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    // Not expired yet (6h TTL), so 0 deleted
+    assert_eq!(gc["expired_deleted"].as_u64().unwrap(), 0);
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+#[test]
+fn test_content_size_limit() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-size-test-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let huge_content = "x".repeat(70_000);
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "store",
+            "-T",
+            "too big",
+            "--content",
+            &huge_content,
+        ])
+        .output()
+        .unwrap();
+    assert!(!output.status.success(), "should reject oversized content");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+#[test]
+fn test_import_export_roundtrip() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db1 = dir.join(format!(
+        "grey-rock-memory-export-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+    let db2 = dir.join(format!(
+        "grey-rock-memory-import-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    // Store in db1
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db1.to_str().unwrap(),
+            "store",
+            "-t",
+            "long",
+            "-T",
+            "portable memory",
+            "--content",
+            "travels between machines",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    // Export from db1
+    let output = std::process::Command::new(binary)
+        .args(["--db", db1.to_str().unwrap(), "export"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    // Import into db2
+    let export_output = std::process::Command::new(binary)
+        .args(["--db", db1.to_str().unwrap(), "export"])
+        .output()
+        .unwrap();
+
+    let mut child = std::process::Command::new(binary)
+        .args(["--db", db2.to_str().unwrap(), "--json", "import"])
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .unwrap();
+    use std::io::Write;
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(&export_output.stdout)
+        .unwrap();
+    let result = child.wait_with_output().unwrap();
+    assert!(
+        result.status.success(),
+        "import failed: {}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+
+    // Verify db2 has the memory
+    let output = std::process::Command::new(binary)
+        .args(["--db", db2.to_str().unwrap(), "--json", "stats"])
+        .output()
+        .unwrap();
+    let stats: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(
+        stats["total"].as_u64().unwrap() >= 1,
+        "import roundtrip failed"
+    );
+
+    let _ = std::fs::remove_file(&db1);
+    let _ = std::fs::remove_file(&db2);
+}
+
+// --- Validation rejection tests ---
+
+#[test]
+fn test_reject_empty_title() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-val-title-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "store",
+            "-T",
+            "",
+            "--content",
+            "some content",
+        ])
+        .output()
+        .unwrap();
+    assert!(!output.status.success(), "should reject empty title");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+#[test]
+fn test_reject_bad_source() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-val-source-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "store",
+            "-T",
+            "test",
+            "--content",
+            "content",
+            "-S",
+            "invalid_source",
+        ])
+        .output()
+        .unwrap();
+    assert!(!output.status.success(), "should reject bad source");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+#[test]
+fn test_reject_bad_namespace() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-val-ns-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "store",
+            "-T",
+            "test",
+            "--content",
+            "content",
+            "-n",
+            "bad namespace",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        !output.status.success(),
+        "should reject namespace with spaces"
+    );
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+#[test]
+fn test_reject_oversized_content() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-val-size-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let huge = "x".repeat(70_000);
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "store",
+            "-T",
+            "huge",
+            "--content",
+            &huge,
+        ])
+        .output()
+        .unwrap();
+    assert!(!output.status.success(), "should reject oversized content");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+#[test]
+fn test_reject_bad_priority() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-val-prio-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "store",
+            "-T",
+            "test",
+            "--content",
+            "content",
+            "-p",
+            "0",
+        ])
+        .output()
+        .unwrap();
+    assert!(!output.status.success(), "should reject priority 0");
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "store",
+            "-T",
+            "test2",
+            "--content",
+            "content",
+            "-p",
+            "11",
+        ])
+        .output()
+        .unwrap();
+    assert!(!output.status.success(), "should reject priority 11");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+#[test]
+fn test_reject_bad_confidence() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-val-conf-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "store",
+            "-T",
+            "test",
+            "--content",
+            "content",
+            "--confidence",
+            "1.5",
+        ])
+        .output()
+        .unwrap();
+    assert!(!output.status.success(), "should reject confidence > 1.0");
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "store",
+            "-T",
+            "test2",
+            "--content",
+            "content",
+            "--confidence",
+            "-0.1",
+        ])
+        .output()
+        .unwrap();
+    assert!(!output.status.success(), "should reject confidence < 0.0");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- Recall scoring order ---
+
+#[test]
+fn test_recall_priority_order() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-order-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    for (title, priority) in [
+        ("alpha recall test", "2"),
+        ("beta recall test", "9"),
+        ("gamma recall test", "5"),
+    ] {
+        let output = std::process::Command::new(binary)
+            .args([
+                "--db",
+                db_path.to_str().unwrap(),
+                "--json",
+                "store",
+                "-t",
+                "long",
+                "-n",
+                "order-test",
+                "-T",
+                title,
+                "--content",
+                &format!("content about recall testing for {}", title),
+                "-p",
+                priority,
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            output.status.success(),
+            "store failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+    }
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "recall",
+            "recall test",
+            "-n",
+            "order-test",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let recalled: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let memories = recalled["memories"].as_array().unwrap();
+    assert!(memories.len() >= 2, "should recall at least 2 memories");
+    // Highest priority (9) should come first
+    let first_priority = memories[0]["priority"].as_i64().unwrap();
+    let second_priority = memories[1]["priority"].as_i64().unwrap();
+    assert!(
+        first_priority >= second_priority,
+        "higher priority should come first: {} vs {}",
+        first_priority,
+        second_priority
+    );
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- TTL assignment ---
+
+#[test]
+fn test_ttl_assignment() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!("grey-rock-memory-ttl-{}.db", uuid::Uuid::new_v4()));
+
+    // Store short-term
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-t",
+            "short",
+            "-n",
+            "ttl-test",
+            "-T",
+            "short lived",
+            "--content",
+            "expires soon",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let short: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(
+        short["expires_at"].is_string(),
+        "short-term should have expires_at"
+    );
+
+    // Store mid-term
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-t",
+            "mid",
+            "-n",
+            "ttl-test",
+            "-T",
+            "mid lived",
+            "--content",
+            "expires later",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let mid: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(
+        mid["expires_at"].is_string(),
+        "mid-term should have expires_at"
+    );
+
+    // Store long-term
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-t",
+            "long",
+            "-n",
+            "ttl-test",
+            "-T",
+            "long lived",
+            "--content",
+            "never expires",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let long: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(
+        long["expires_at"].is_null(),
+        "long-term should NOT have expires_at"
+    );
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- Auto-promotion ---
+
+#[test]
+fn test_auto_promotion() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-promote-auto-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    // Store a mid-term memory
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-t",
+            "mid",
+            "-n",
+            "promo-test",
+            "-T",
+            "promotable memory",
+            "--content",
+            "this memory should be promoted after enough accesses",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let stored: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let id = stored["id"].as_str().unwrap().to_string();
+
+    // Recall 6 times (promotion threshold is 5)
+    for _ in 0..6 {
+        let output = std::process::Command::new(binary)
+            .args([
+                "--db",
+                db_path.to_str().unwrap(),
+                "--json",
+                "recall",
+                "promotable memory",
+                "-n",
+                "promo-test",
+            ])
+            .output()
+            .unwrap();
+        assert!(output.status.success());
+    }
+
+    // Verify it became long-term
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "get", &id])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let got: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(
+        got["memory"]["tier"], "long",
+        "memory should have been auto-promoted to long"
+    );
+    assert!(
+        got["memory"]["expires_at"].is_null(),
+        "promoted memory should have no expiry"
+    );
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- Forget by pattern ---
+
+#[test]
+fn test_forget_by_pattern() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-forget-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    // Store 3 memories, 2 with "ephemeral" in content
+    for (title, content) in [
+        ("keep this one", "permanent important data"),
+        ("forget alpha", "ephemeral data to remove"),
+        ("forget beta", "ephemeral data to discard"),
+    ] {
+        let output = std::process::Command::new(binary)
+            .args([
+                "--db",
+                db_path.to_str().unwrap(),
+                "store",
+                "-t",
+                "long",
+                "-n",
+                "forget-test",
+                "-T",
+                title,
+                "--content",
+                content,
+            ])
+            .output()
+            .unwrap();
+        assert!(output.status.success());
+    }
+
+    // Verify 3 exist
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "stats"])
+        .output()
+        .unwrap();
+    let stats: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(stats["total"].as_u64().unwrap(), 3);
+
+    // Forget by pattern
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "forget",
+            "-p",
+            "ephemeral",
+            "-n",
+            "forget-test",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let forgot: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(
+        forgot["deleted"].as_u64().unwrap() >= 1,
+        "should have deleted at least 1"
+    );
+
+    // Verify count decreased
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "stats"])
+        .output()
+        .unwrap();
+    let stats: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(
+        stats["total"].as_u64().unwrap() < 3,
+        "total should have decreased"
+    );
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- Namespace isolation ---
+
+#[test]
+fn test_namespace_isolation() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-nsiso-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    // Store in ns-a
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "store",
+            "-t",
+            "long",
+            "-n",
+            "ns-a",
+            "-T",
+            "alpha secret data",
+            "--content",
+            "isolation test alpha content data",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    // Store in ns-b
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "store",
+            "-t",
+            "long",
+            "-n",
+            "ns-b",
+            "-T",
+            "beta secret data",
+            "--content",
+            "isolation test beta content data",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    // Recall in ns-a should not return ns-b
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "recall",
+            "secret data",
+            "-n",
+            "ns-a",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let recalled: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    for mem in recalled["memories"].as_array().unwrap() {
+        assert_eq!(
+            mem["namespace"].as_str().unwrap(),
+            "ns-a",
+            "namespace isolation broken: found ns-b memory in ns-a recall"
+        );
+    }
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- Link creation ---
+
+#[test]
+fn test_link_creation() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!("grey-rock-memory-link-{}.db", uuid::Uuid::new_v4()));
+
+    // Store two memories
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-t",
+            "long",
+            "-n",
+            "link-test",
+            "-T",
+            "link source",
+            "--content",
+            "source content",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let src: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let src_id = src["id"].as_str().unwrap().to_string();
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-t",
+            "long",
+            "-n",
+            "link-test",
+            "-T",
+            "link target",
+            "--content",
+            "target content",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let tgt: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let tgt_id = tgt["id"].as_str().unwrap().to_string();
+
+    // Link them
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "link",
+            &src_id,
+            &tgt_id,
+            "-r",
+            "related_to",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    // Get source and verify links appear
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "get", &src_id])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let got: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let links = got["links"].as_array().unwrap();
+    assert!(!links.is_empty(), "links should not be empty after linking");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- Consolidation ---
+
+#[test]
+fn test_consolidation() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-consol-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let mut ids = Vec::new();
+    for (title, content) in [
+        (
+            "consol alpha",
+            "first piece of knowledge about consolidation",
+        ),
+        (
+            "consol beta",
+            "second piece of knowledge about consolidation",
+        ),
+        (
+            "consol gamma",
+            "third piece of knowledge about consolidation",
+        ),
+    ] {
+        let output = std::process::Command::new(binary)
+            .args([
+                "--db",
+                db_path.to_str().unwrap(),
+                "--json",
+                "store",
+                "-t",
+                "mid",
+                "-n",
+                "consol-test",
+                "-T",
+                title,
+                "--content",
+                content,
+            ])
+            .output()
+            .unwrap();
+        assert!(output.status.success());
+        let stored: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+        ids.push(stored["id"].as_str().unwrap().to_string());
+    }
+
+    // Verify 3 exist
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "stats"])
+        .output()
+        .unwrap();
+    let stats: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(stats["total"].as_u64().unwrap(), 3);
+
+    // Consolidate
+    let ids_str = ids.join(",");
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "consolidate",
+            &ids_str,
+            "-T",
+            "consolidated knowledge",
+            "-s",
+            "all three pieces combined",
+            "-n",
+            "consol-test",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "consolidate failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    // Verify total decreased (3 removed, 1 added = 1)
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "stats"])
+        .output()
+        .unwrap();
+    let stats: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(
+        stats["total"].as_u64().unwrap() < 3,
+        "total should have decreased after consolidation"
+    );
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- Promote command ---
+
+#[test]
+fn test_promote_command() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-promote-cmd-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-t",
+            "mid",
+            "-n",
+            "promote-test",
+            "-T",
+            "to be promoted",
+            "--content",
+            "this will become long-term",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let stored: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let id = stored["id"].as_str().unwrap().to_string();
+
+    // Promote
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "promote", &id])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    // Verify tier=long
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "get", &id])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let got: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(got["memory"]["tier"], "long");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- Namespaces command ---
+
+#[test]
+fn test_namespaces_command() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-ns-cmd-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    // Store in two namespaces
+    for (ns, title) in [("ns-alpha", "alpha mem"), ("ns-beta", "beta mem")] {
+        let output = std::process::Command::new(binary)
+            .args([
+                "--db",
+                db_path.to_str().unwrap(),
+                "store",
+                "-t",
+                "long",
+                "-n",
+                ns,
+                "-T",
+                title,
+                "--content",
+                "test content",
+            ])
+            .output()
+            .unwrap();
+        assert!(output.status.success());
+    }
+
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "namespaces"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let ns: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let namespaces = ns["namespaces"].as_array().unwrap();
+    let ns_names: Vec<&str> = namespaces
+        .iter()
+        .map(|n| n["namespace"].as_str().unwrap())
+        .collect();
+    assert!(ns_names.contains(&"ns-alpha"), "should contain ns-alpha");
+    assert!(ns_names.contains(&"ns-beta"), "should contain ns-beta");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- Unicode handling ---
+
+#[test]
+fn test_unicode_handling() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-unicode-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-t",
+            "long",
+            "-n",
+            "unicode-test",
+            "-T",
+            "Memoria en espanol y japones",
+            "--content",
+            "Contenido con acentos: cafe, nino, resumen. Also Japanese: konnichiwa sekai",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "store with unicode failed");
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "recall",
+            "espanol japones",
+            "-n",
+            "unicode-test",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let recalled: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(
+        recalled["count"].as_u64().unwrap() >= 1,
+        "should recall unicode memory"
+    );
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- Boundary values ---
+
+#[test]
+fn test_boundary_priority_min() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-bnd-pmin-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-T",
+            "min priority",
+            "--content",
+            "boundary test",
+            "-p",
+            "1",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "priority=1 should be valid");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+#[test]
+fn test_boundary_priority_max() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-bnd-pmax-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-T",
+            "max priority",
+            "--content",
+            "boundary test",
+            "-p",
+            "10",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "priority=10 should be valid");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+#[test]
+fn test_boundary_confidence_zero() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-bnd-c0-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-T",
+            "zero confidence",
+            "--content",
+            "boundary test",
+            "--confidence",
+            "0.0",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "confidence=0.0 should be valid");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+#[test]
+fn test_boundary_confidence_one() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-bnd-c1-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-T",
+            "full confidence",
+            "--content",
+            "boundary test",
+            "--confidence",
+            "1.0",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "confidence=1.0 should be valid");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+#[test]
+fn test_boundary_max_title_length() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-bnd-tlen-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let long_title = "a".repeat(512);
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-T",
+            &long_title,
+            "--content",
+            "boundary test",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "512-char title should be valid");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- Export includes links ---
+
+#[test]
+fn test_export_includes_links() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-explink-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    // Store two memories
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-t",
+            "long",
+            "-n",
+            "explink",
+            "-T",
+            "export link src",
+            "--content",
+            "source",
+        ])
+        .output()
+        .unwrap();
+    let src: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let src_id = src["id"].as_str().unwrap().to_string();
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-t",
+            "long",
+            "-n",
+            "explink",
+            "-T",
+            "export link tgt",
+            "--content",
+            "target",
+        ])
+        .output()
+        .unwrap();
+    let tgt: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let tgt_id = tgt["id"].as_str().unwrap().to_string();
+
+    // Link them
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "link",
+            &src_id,
+            &tgt_id,
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    // Export
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "export"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let exported: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let links = exported["links"].as_array().unwrap();
+    assert!(!links.is_empty(), "export should include links");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- Import roundtrip with count match ---
+
+#[test]
+fn test_import_roundtrip_count_match() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db1 = dir.join(format!(
+        "grey-rock-memory-irt-src-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+    let db2 = dir.join(format!(
+        "grey-rock-memory-irt-dst-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    // Store 3 memories in db1
+    for i in 0..3 {
+        let output = std::process::Command::new(binary)
+            .args([
+                "--db",
+                db1.to_str().unwrap(),
+                "store",
+                "-t",
+                "long",
+                "-n",
+                "irt-test",
+                "-T",
+                &format!("roundtrip mem {}", i),
+                "--content",
+                &format!("content for roundtrip {}", i),
+            ])
+            .output()
+            .unwrap();
+        assert!(output.status.success());
+    }
+
+    // Get source count
+    let output = std::process::Command::new(binary)
+        .args(["--db", db1.to_str().unwrap(), "--json", "stats"])
+        .output()
+        .unwrap();
+    let src_stats: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let src_count = src_stats["total"].as_u64().unwrap();
+
+    // Export from db1
+    let export_output = std::process::Command::new(binary)
+        .args(["--db", db1.to_str().unwrap(), "export"])
+        .output()
+        .unwrap();
+    assert!(export_output.status.success());
+
+    // Import into db2
+    let mut child = std::process::Command::new(binary)
+        .args(["--db", db2.to_str().unwrap(), "--json", "import"])
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .unwrap();
+    use std::io::Write;
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(&export_output.stdout)
+        .unwrap();
+    let result = child.wait_with_output().unwrap();
+    assert!(result.status.success());
+
+    // Verify counts match
+    let output = std::process::Command::new(binary)
+        .args(["--db", db2.to_str().unwrap(), "--json", "stats"])
+        .output()
+        .unwrap();
+    let dst_stats: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let dst_count = dst_stats["total"].as_u64().unwrap();
+    assert_eq!(
+        src_count, dst_count,
+        "import count should match export count"
+    );
+
+    let _ = std::fs::remove_file(&db1);
+    let _ = std::fs::remove_file(&db2);
+}
+
+// --- Update via CLI ---
+
+#[test]
+fn test_update_via_cli() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-update-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-t",
+            "long",
+            "-n",
+            "update-test",
+            "-T",
+            "original title",
+            "--content",
+            "original content",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let stored: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let id = stored["id"].as_str().unwrap().to_string();
+
+    // Update title
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "update",
+            &id,
+            "-T",
+            "updated title",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    // Verify changed
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "get", &id])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let got: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(got["memory"]["title"], "updated title");
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- Stats accuracy ---
+
+#[test]
+fn test_stats_accuracy() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-statsacc-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let count = 5;
+    for i in 0..count {
+        let output = std::process::Command::new(binary)
+            .args([
+                "--db",
+                db_path.to_str().unwrap(),
+                "store",
+                "-t",
+                "long",
+                "-n",
+                "stats-test",
+                "-T",
+                &format!("stats mem {}", i),
+                "--content",
+                &format!("content {}", i),
+            ])
+            .output()
+            .unwrap();
+        assert!(output.status.success());
+    }
+
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "stats"])
+        .output()
+        .unwrap();
+    let stats: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(
+        stats["total"].as_u64().unwrap(),
+        count,
+        "stats total should match stored count"
+    );
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- GC only removes expired ---
+
+#[test]
+fn test_gc_preserves_long_term() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-gckeep-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    // Store short-term and long-term
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-t",
+            "short",
+            "-n",
+            "gc-test",
+            "-T",
+            "short lived gc test",
+            "--content",
+            "will have TTL",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "store",
+            "-t",
+            "long",
+            "-n",
+            "gc-test",
+            "-T",
+            "long lived gc test",
+            "--content",
+            "will persist forever",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let long_stored: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let long_id = long_stored["id"].as_str().unwrap().to_string();
+
+    // Run GC (short hasn't expired yet, so nothing deleted)
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "gc"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    // Verify long-term still exists
+    let output = std::process::Command::new(binary)
+        .args(["--db", db_path.to_str().unwrap(), "--json", "get", &long_id])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "long-term memory should survive GC"
+    );
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- Search with --since ---
+
+#[test]
+fn test_search_with_since_future() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-since-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "store",
+            "-t",
+            "long",
+            "-n",
+            "since-test",
+            "-T",
+            "searchable since test",
+            "--content",
+            "this should not appear with future since",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    // Search with --since far in the future
+    let output = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "--json",
+            "search",
+            "searchable",
+            "--since",
+            "2099-01-01T00:00:00Z",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let results: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(
+        results["count"].as_u64().unwrap(),
+        0,
+        "future --since should return 0 results"
+    );
+
+    let _ = std::fs::remove_file(&db_path);
+}
+
+// --- Health endpoint via HTTP ---
+
+#[test]
+fn test_health_endpoint() {
+    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let dir = std::env::temp_dir();
+    let db_path = dir.join(format!(
+        "grey-rock-memory-health-{}.db",
+        uuid::Uuid::new_v4()
+    ));
+
+    // Find a free port
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port();
+    drop(listener);
+
+    // Start the server in the background
+    let mut child = std::process::Command::new(binary)
+        .args([
+            "--db",
+            db_path.to_str().unwrap(),
+            "serve",
+            "--port",
+            &port.to_string(),
+        ])
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+        .unwrap();
+
+    // Wait for server to start
+    let url = format!("http://127.0.0.1:{}/api/v1/health", port);
+    let mut ok = false;
+    for _ in 0..30 {
+        std::thread::sleep(std::time::Duration::from_millis(100));
+        if let Ok(output) = std::process::Command::new("curl")
+            .args(["-s", "-o", "/dev/null", "-w", "%{http_code}", &url])
+            .output()
+        {
+            let code = String::from_utf8_lossy(&output.stdout);
+            if code == "200" {
+                ok = true;
+                break;
+            }
+        }
+    }
+
+    // Kill the server
+    let _ = child.kill();
+    let _ = child.wait();
+
+    assert!(ok, "health endpoint should return 200");
+
+    let _ = std::fs::remove_file(&db_path);
+}

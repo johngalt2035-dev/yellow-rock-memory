@@ -1,0 +1,100 @@
+{
+  "_comment": "Grey Rock v3.0 Configuration — edit this file and run your setup",
+  "version": "3.0",
+
+  "communication_style": {
+    "default": "executive",
+    "_options": ["personal", "executive"]
+  },
+
+  "user": {
+    "name": "Your Name",
+    "timezone": "America/New_York"
+  },
+
+  "contacts": [
+    {
+      "id": "opposing-party",
+      "name": "Contact A",
+      "phone": "+1XXXXXXXXXX",
+      "channels": ["signal", "sms"],
+      "primary_channel": "signal",
+      "communication_style": "executive",
+      "protocol": "grey-rock",
+      "escalation_threshold": 7,
+      "notes": "High-conflict counterparty. Full BIFF protocol."
+    },
+    {
+      "id": "neighbor",
+      "name": "Contact B",
+      "phone": "+1XXXXXXXXXX",
+      "channels": ["whatsapp"],
+      "primary_channel": "whatsapp",
+      "communication_style": "executive",
+      "protocol": "grey-rock",
+      "escalation_threshold": 5,
+      "notes": "High-conflict counterparty. Grey rock on property disputes."
+    },
+    {
+      "id": "friend-a",
+      "name": "Contact C",
+      "phone": "+1XXXXXXXXXX",
+      "channels": ["signal", "sms"],
+      "primary_channel": "signal",
+      "communication_style": "personal",
+      "protocol": "normal",
+      "notes": "Normal communication. No protocol applied."
+    }
+  ],
+
+  "llm": {
+    "_comment": "Choose one: openai, claude, xai, gemini, ollama",
+    "provider": "openai",
+    "model": "gpt-4o",
+    "api_key_env": "OPENAI_API_KEY",
+
+    "_alternatives": {
+      "claude": { "provider": "claude", "model": "claude-sonnet-4-20250514", "api_key_env": "ANTHROPIC_API_KEY" },
+      "xai": { "provider": "xai", "model": "grok-4-1-fast-reasoning", "api_key_env": "XAI_API_KEY" },
+      "gemini": { "provider": "gemini", "model": "gemini-2.5-pro", "api_key_env": "GOOGLE_API_KEY" },
+      "ollama": { "provider": "ollama", "model": "llama3.2:8b", "api_key_env": "none" }
+    }
+  },
+
+  "memory": {
+    "db_path": "~/.grey-rock/memory.db",
+    "port": 9077,
+    "retention_days": 365
+  },
+
+  "message_window": {
+    "active_start": "07:00",
+    "active_end": "22:00",
+    "timezone": "America/New_York",
+    "_comment": "Messages only sent/received during this window. Emergencies bypass."
+  },
+
+  "channels": {
+    "_comment": "Configure which messaging platforms you use",
+    "signal": {
+      "enabled": true,
+      "account": "+1XXXXXXXXXX"
+    },
+    "telegram": {
+      "enabled": false,
+      "bot_token": ""
+    },
+    "whatsapp": {
+      "enabled": false,
+      "business_phone": "",
+      "api_token": ""
+    },
+    "sms": {
+      "enabled": false,
+      "provider": "twilio",
+      "account_sid": "",
+      "auth_token": "",
+      "from_number": "+1XXXXXXXXXX"
+    }
+  }
+}
