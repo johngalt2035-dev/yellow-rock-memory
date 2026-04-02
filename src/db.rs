@@ -13,6 +13,8 @@ use rusqlite::{params, Connection};
 use sha2::{Digest, Sha256};
 use std::path::Path;
 
+use tracing;
+
 use crate::models::*;
 
 const SCHEMA: &str = r#"
@@ -1373,16 +1375,15 @@ pub fn approve_draft(
         "SELECT draft_hash, reviewer_chain, contact_id FROM approved_drafts WHERE id = ?1 AND status = 'pending'",
         params![id],
         |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
-    ).map_err(|_| anyhow::anyhow!("draft not found or not pending"))?;
+    ).map_err(|_| anyhow::anyhow!("operation failed"))?;
 
     // CRITICAL SAFETY CHECK: reviewer must NOT be the contact (high-conflict recipient)
     if reviewer.eq_ignore_ascii_case(&contact_id) {
-        anyhow::bail!(
-            "BLOCKED: reviewer '{}' matches the contact_id. \
-             Drafts must be reviewed by the PRINCIPAL (system owner), \
-             never by the contact (high-conflict recipient).",
-            reviewer
+        tracing::error!(
+            "SECURITY: approve_draft blocked — reviewer '{}' matches contact_id '{}'",
+            reviewer, contact_id
         );
+        anyhow::bail!("operation denied");
     }
 
     let approval_hash = compute_approval_hash(&draft_hash, reviewer, "approved", &now);
@@ -1419,16 +1420,15 @@ pub fn reject_draft(
             params![id],
             |r| Ok((r.get(0)?, r.get(1)?)),
         )
-        .map_err(|_| anyhow::anyhow!("draft not found or not pending"))?;
+        .map_err(|_| anyhow::anyhow!("operation failed"))?;
 
     // CRITICAL SAFETY CHECK: reviewer must NOT be the contact (high-conflict recipient)
     if reviewer.eq_ignore_ascii_case(&contact_id) {
-        anyhow::bail!(
-            "BLOCKED: reviewer '{}' matches the contact_id. \
-             Drafts must be reviewed by the PRINCIPAL (system owner), \
-             never by the contact (high-conflict recipient).",
-            reviewer
+        tracing::error!(
+            "SECURITY: reject_draft blocked — reviewer '{}' matches contact_id '{}'",
+            reviewer, contact_id
         );
+        anyhow::bail!("operation denied");
     }
 
     let mut chain: Vec<serde_json::Value> = serde_json::from_str(&chain_json).unwrap_or_default();
@@ -1504,6 +1504,8 @@ pub fn list_drafts(
 }
 
 /// Mark a draft as sent. Verifies content match, computes sent_hash.
+/// SAFETY: This is a PRINCIPAL-ONLY operation (enforced by HTTP auth middleware).
+/// Error messages are sanitized to avoid leaking draft state to unauthorized callers.
 pub fn mark_draft_sent(
     conn: &Connection,
     id: &str,
@@ -1512,21 +1514,16 @@ pub fn mark_draft_sent(
 ) -> Result<bool> {
     let draft = get_draft(conn, id)?;
     let Some(draft) = draft else {
-        anyhow::bail!("draft not found")
+        anyhow::bail!("operation failed")
     };
 
     if draft.status != "approved" {
-        anyhow::bail!(
-            "draft must be approved before sending (current: {})",
-            draft.status
-        );
+        anyhow::bail!("operation failed: precondition not met");
     }
 
     // Verify content match — zero deviation
     if draft.draft_content != sent_content {
-        anyhow::bail!(
-            "DEVIATION DETECTED: sent content does not match approved draft. Send BLOCKED."
-        );
+        anyhow::bail!("operation failed: content mismatch");
     }
 
     let now = Utc::now().to_rfc3339();

@@ -519,10 +519,22 @@ fn handle_create_draft(conn: &rusqlite::Connection, params: &Value) -> Result<Va
     Ok(json!({"id": id, "draft_hash": hash, "status": "pending"}))
 }
 
-fn handle_approve_draft(conn: &rusqlite::Connection, params: &Value) -> Result<Value, String> {
+fn handle_approve_draft(
+    conn: &rusqlite::Connection,
+    params: &Value,
+    principal_id: Option<&str>,
+) -> Result<Value, String> {
     let id = params["id"].as_str().ok_or("id required")?;
     let reviewer = params["reviewer"].as_str().ok_or("reviewer required")?;
     let reason = params["reason"].as_str();
+
+    // If principal_id is configured, enforce it — only the principal can approve
+    if let Some(pid) = principal_id {
+        if !reviewer.eq_ignore_ascii_case(pid) {
+            return Err("operation denied: reviewer must be the principal".into());
+        }
+    }
+
     db::approve_draft(conn, id, reviewer, reason).map_err(|e| e.to_string())?;
     Ok(json!({"approved": true, "id": id}))
 }
@@ -543,10 +555,22 @@ fn handle_verify_draft(conn: &rusqlite::Connection, params: &Value) -> Result<Va
     serde_json::to_value(v).map_err(|e| e.to_string())
 }
 
-fn handle_reject_draft(conn: &rusqlite::Connection, params: &Value) -> Result<Value, String> {
+fn handle_reject_draft(
+    conn: &rusqlite::Connection,
+    params: &Value,
+    principal_id: Option<&str>,
+) -> Result<Value, String> {
     let id = params["id"].as_str().ok_or("id required")?;
     let reviewer = params["reviewer"].as_str().ok_or("reviewer required")?;
     let reason = params["reason"].as_str();
+
+    // If principal_id is configured, enforce it — only the principal can reject
+    if let Some(pid) = principal_id {
+        if !reviewer.eq_ignore_ascii_case(pid) {
+            return Err("operation denied: reviewer must be the principal".into());
+        }
+    }
+
     db::reject_draft(conn, id, reviewer, reason).map_err(|e| e.to_string())?;
     Ok(json!({"rejected": true, "id": id}))
 }
@@ -563,7 +587,12 @@ fn handle_send_draft(conn: &rusqlite::Connection, params: &Value) -> Result<Valu
 
 // --- MCP protocol handler ---
 
-fn handle_request(conn: &rusqlite::Connection, db_path: &Path, req: &RpcRequest) -> RpcResponse {
+fn handle_request(
+    conn: &rusqlite::Connection,
+    db_path: &Path,
+    principal_id: Option<&str>,
+    req: &RpcRequest,
+) -> RpcResponse {
     let id = req.id.clone().unwrap_or(Value::Null);
 
     match req.method.as_str() {
@@ -597,10 +626,10 @@ fn handle_request(conn: &rusqlite::Connection, db_path: &Path, req: &RpcRequest)
                 "grm_escalation_score" => handle_escalation_score(conn, arguments),
                 "grm_digest" => handle_digest(conn, arguments),
                 "grm_create_draft" => handle_create_draft(conn, arguments),
-                "grm_approve_draft" => handle_approve_draft(conn, arguments),
+                "grm_approve_draft" => handle_approve_draft(conn, arguments, principal_id),
                 "grm_list_drafts" => handle_list_drafts(conn, arguments),
                 "grm_verify_draft" => handle_verify_draft(conn, arguments),
-                "grm_reject_draft" => handle_reject_draft(conn, arguments),
+                "grm_reject_draft" => handle_reject_draft(conn, arguments, principal_id),
                 "grm_send_draft" => handle_send_draft(conn, arguments),
                 _ => Err(format!("unknown tool: {tool_name}")),
             };
@@ -630,12 +659,20 @@ fn handle_request(conn: &rusqlite::Connection, db_path: &Path, req: &RpcRequest)
 }
 
 /// Run the MCP server over stdio. Blocks until stdin closes.
+/// `principal_id` is read from GRM_PRINCIPAL_ID env var. When set,
+/// only this identity can approve/reject drafts via MCP tools.
 pub fn run_mcp_server(db_path: &Path) -> anyhow::Result<()> {
     let conn = db::open(db_path)?;
     let stdin = io::stdin();
     let mut stdout = io::stdout();
+    let principal_id = std::env::var("GRM_PRINCIPAL_ID").ok();
 
     eprintln!("grey-rock-memory MCP server started (stdio)");
+    if principal_id.is_some() {
+        eprintln!("  principal_id enforcement: ENABLED");
+    } else {
+        eprintln!("  WARNING: GRM_PRINCIPAL_ID not set — draft review identity not enforced");
+    }
 
     for line in stdin.lock().lines() {
         let line = line?;
@@ -662,7 +699,7 @@ pub fn run_mcp_server(db_path: &Path) -> anyhow::Result<()> {
             }
         }
 
-        let resp = handle_request(&conn, db_path, &req);
+        let resp = handle_request(&conn, db_path, principal_id.as_deref(), &req);
         let out = serde_json::to_string(&resp)?;
         writeln!(stdout, "{out}")?;
         stdout.flush()?;

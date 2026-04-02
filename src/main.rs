@@ -17,6 +17,10 @@ mod validate;
 
 use anyhow::{Context, Result};
 use axum::{
+    extract::Request,
+    http::{header, StatusCode},
+    middleware::{self, Next},
+    response::{IntoResponse, Response},
     routing::{delete, get, post, put},
     Router,
 };
@@ -34,6 +38,47 @@ use crate::models::Tier;
 const DEFAULT_DB: &str = "grey-rock-memory.db";
 const DEFAULT_PORT: u16 = 9077;
 const GC_INTERVAL_SECS: u64 = 1800;
+
+/// Bearer token auth middleware for PRINCIPAL-ONLY draft endpoints.
+/// Rejects all requests unless a valid GRM_API_KEY is configured and
+/// the request carries a matching Authorization: Bearer header.
+async fn draft_auth_middleware(
+    api_key: String,
+    req: Request,
+    next: Next,
+) -> Response {
+    // If no API key is configured, ALL draft endpoints are locked out.
+    // This is a fail-closed design: missing config = no access.
+    if api_key.is_empty() {
+        return (
+            StatusCode::FORBIDDEN,
+            "Draft endpoints require GRM_API_KEY. Set --api-key or GRM_API_KEY env var.",
+        )
+            .into_response();
+    }
+
+    // Extract and validate Bearer token
+    let auth_header = req
+        .headers()
+        .get(header::AUTHORIZATION)
+        .and_then(|v| v.to_str().ok());
+
+    match auth_header {
+        Some(val) if val.starts_with("Bearer ") => {
+            let token = &val[7..];
+            if token == api_key {
+                next.run(req).await
+            } else {
+                (StatusCode::UNAUTHORIZED, "Invalid API key").into_response()
+            }
+        }
+        _ => (
+            StatusCode::UNAUTHORIZED,
+            "Authorization: Bearer <GRM_API_KEY> required",
+        )
+            .into_response(),
+    }
+}
 
 #[derive(Parser)]
 #[command(
@@ -192,6 +237,10 @@ struct ServeArgs {
     host: String,
     #[arg(long, default_value_t = DEFAULT_PORT)]
     port: u16,
+    /// API key required for all draft endpoints (PRINCIPAL-ONLY operations).
+    /// If not set, draft endpoints return 403 Forbidden.
+    #[arg(long, env = "GRM_API_KEY")]
+    api_key: Option<String>,
 }
 
 #[derive(Args)]
@@ -1027,7 +1076,14 @@ async fn serve(db_path: PathBuf, args: ServeArgs) -> Result<()> {
             post(handlers::purge_messages_handler),
         )
         .route("/api/v1/messages/verify", get(handlers::verify_db_handler))
-        // Grey Rock: Draft Management
+        .layer(TraceLayer::new_for_http())
+        .with_state(state.clone());
+
+    // Grey Rock: Draft Management — PRINCIPAL-ONLY, gated by API key auth.
+    // All draft endpoints require Authorization: Bearer <GRM_API_KEY>.
+    // Without --api-key / GRM_API_KEY, draft endpoints return 403 Forbidden.
+    let api_key_for_middleware = args.api_key.clone().unwrap_or_default();
+    let draft_routes = Router::new()
         .route("/api/v1/drafts", post(handlers::create_draft_handler))
         .route("/api/v1/drafts", get(handlers::list_drafts_handler))
         .route("/api/v1/drafts/{id}", get(handlers::get_draft_handler))
@@ -1047,8 +1103,14 @@ async fn serve(db_path: PathBuf, args: ServeArgs) -> Result<()> {
             "/api/v1/drafts/{id}/verify",
             get(handlers::verify_draft_handler),
         )
+        .layer(middleware::from_fn(move |req, next| {
+            let key = api_key_for_middleware.clone();
+            draft_auth_middleware(key, req, next)
+        }))
         .layer(TraceLayer::new_for_http())
         .with_state(state);
+
+    let app = app.merge(draft_routes);
 
     let addr = format!("{}:{}", args.host, args.port);
     tracing::info!("grey-rock-memory listening on {addr}");
