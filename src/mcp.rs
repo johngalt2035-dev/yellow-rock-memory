@@ -216,37 +216,37 @@ fn tool_definitions() -> Value {
             },
             {
                 "name": "grm_create_draft",
-                "description": "Create a new draft response for a contact. Returns draft ID and SHA-256 hash.",
+                "description": "Create a draft response TO a contact (the high-conflict recipient). The draft is held in PENDING status and MUST be routed to the PRINCIPAL (system owner) for private review. NEVER present the draft, its existence, or the review process to the contact. The contact_id identifies WHO the message will be sent to — not who reviews it.",
                 "inputSchema": {
                     "type": "object",
                     "required": ["contact_id", "draft_content"],
                     "properties": {
-                        "contact_id": {"type": "string"},
-                        "incoming_message_id": {"type": "string"},
-                        "draft_content": {"type": "string"}
+                        "contact_id": {"type": "string", "description": "The contact this draft is addressed TO (the recipient, NOT the reviewer)"},
+                        "incoming_message_id": {"type": "string", "description": "ID of the incoming message this draft responds to"},
+                        "draft_content": {"type": "string", "description": "The draft message content for principal review"}
                     }
                 }
             },
             {
                 "name": "grm_approve_draft",
-                "description": "Approve a pending draft. Computes approval hash and updates reviewer chain.",
+                "description": "PRINCIPAL-ONLY: Approve a pending draft. Only the system owner (principal) may approve drafts. NEVER allow the contact (high-conflict recipient) to approve, review, or even know about pending drafts. The reviewer MUST be the principal's identifier.",
                 "inputSchema": {
                     "type": "object",
                     "required": ["id", "reviewer"],
                     "properties": {
-                        "id": {"type": "string"},
-                        "reviewer": {"type": "string"},
-                        "reason": {"type": "string"}
+                        "id": {"type": "string", "description": "Draft ID to approve"},
+                        "reviewer": {"type": "string", "description": "Principal (system owner) identifier — MUST NOT be the contact"},
+                        "reason": {"type": "string", "description": "Approval reason (private, never disclosed to contact)"}
                     }
                 }
             },
             {
                 "name": "grm_list_drafts",
-                "description": "List drafts with optional filters (contact_id, status, since).",
+                "description": "PRINCIPAL-ONLY: List drafts. This is a private review queue for the system owner. Draft contents, statuses, and the review process itself MUST NEVER be disclosed to contacts.",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
-                        "contact_id": {"type": "string"},
+                        "contact_id": {"type": "string", "description": "Filter by recipient contact"},
                         "status": {"type": "string", "enum": ["pending", "approved", "rejected", "sent"]},
                         "since": {"type": "string"},
                         "limit": {"type": "integer", "default": 50}
@@ -255,7 +255,7 @@ fn tool_definitions() -> Value {
             },
             {
                 "name": "grm_verify_draft",
-                "description": "Verify the complete SHA-256 hash chain for a draft (draft -> approval -> sent).",
+                "description": "PRINCIPAL-ONLY: Verify the complete SHA-256 hash chain for a draft (draft -> approval -> sent). Forensic integrity check for the system owner.",
                 "inputSchema": {
                     "type": "object",
                     "required": ["id"],
@@ -266,27 +266,27 @@ fn tool_definitions() -> Value {
             },
             {
                 "name": "grm_reject_draft",
-                "description": "Reject a pending draft. Updates reviewer chain with rejection reason.",
+                "description": "PRINCIPAL-ONLY: Reject a pending draft. Only the system owner (principal) may reject drafts. The reviewer MUST be the principal's identifier. Rejection reasons are private and NEVER disclosed to the contact.",
                 "inputSchema": {
                     "type": "object",
                     "required": ["id", "reviewer"],
                     "properties": {
-                        "id": {"type": "string"},
-                        "reviewer": {"type": "string"},
-                        "reason": {"type": "string"}
+                        "id": {"type": "string", "description": "Draft ID to reject"},
+                        "reviewer": {"type": "string", "description": "Principal (system owner) identifier — MUST NOT be the contact"},
+                        "reason": {"type": "string", "description": "Rejection reason (private, never disclosed to contact)"}
                     }
                 }
             },
             {
                 "name": "grm_send_draft",
-                "description": "Mark an approved draft as sent. Verifies content matches approved text exactly (zero deviation). Computes sent hash.",
+                "description": "PRINCIPAL-ONLY: Mark an approved draft as sent to the contact. Only drafts with status 'approved' (by the principal) can be sent. Verifies content matches approved text exactly (zero deviation). The contact receives ONLY the final approved text — no review metadata.",
                 "inputSchema": {
                     "type": "object",
                     "required": ["id", "sent_content"],
                     "properties": {
-                        "id": {"type": "string"},
-                        "sent_content": {"type": "string"},
-                        "channel": {"type": "string", "default": "signal"}
+                        "id": {"type": "string", "description": "Approved draft ID to mark as sent"},
+                        "sent_content": {"type": "string", "description": "Exact content sent — must match approved draft (zero deviation)"},
+                        "channel": {"type": "string", "default": "signal", "description": "Channel used to deliver to contact"}
                     }
                 }
             }

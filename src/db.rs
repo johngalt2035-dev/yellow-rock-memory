@@ -1359,6 +1359,8 @@ pub fn create_draft(
 }
 
 /// Approve a draft. Computes approval_hash, updates reviewer_chain.
+/// SAFETY: The reviewer MUST be the principal (system owner), NEVER the contact.
+/// This function enforces that the reviewer cannot be the draft's contact_id.
 pub fn approve_draft(
     conn: &Connection,
     id: &str,
@@ -1367,11 +1369,21 @@ pub fn approve_draft(
 ) -> Result<bool> {
     let now = Utc::now().to_rfc3339();
     // Get current draft
-    let (draft_hash, chain_json): (String, String) = conn.query_row(
-        "SELECT draft_hash, reviewer_chain FROM approved_drafts WHERE id = ?1 AND status = 'pending'",
+    let (draft_hash, chain_json, contact_id): (String, String, String) = conn.query_row(
+        "SELECT draft_hash, reviewer_chain, contact_id FROM approved_drafts WHERE id = ?1 AND status = 'pending'",
         params![id],
-        |r| Ok((r.get(0)?, r.get(1)?)),
+        |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
     ).map_err(|_| anyhow::anyhow!("draft not found or not pending"))?;
+
+    // CRITICAL SAFETY CHECK: reviewer must NOT be the contact (high-conflict recipient)
+    if reviewer.eq_ignore_ascii_case(&contact_id) {
+        anyhow::bail!(
+            "BLOCKED: reviewer '{}' matches the contact_id. \
+             Drafts must be reviewed by the PRINCIPAL (system owner), \
+             never by the contact (high-conflict recipient).",
+            reviewer
+        );
+    }
 
     let approval_hash = compute_approval_hash(&draft_hash, reviewer, "approved", &now);
 
@@ -1393,6 +1405,7 @@ pub fn approve_draft(
 }
 
 /// Reject a draft. Updates reviewer_chain.
+/// SAFETY: The reviewer MUST be the principal (system owner), NEVER the contact.
 pub fn reject_draft(
     conn: &Connection,
     id: &str,
@@ -1400,13 +1413,23 @@ pub fn reject_draft(
     reason: Option<&str>,
 ) -> Result<bool> {
     let now = Utc::now().to_rfc3339();
-    let chain_json: String = conn
+    let (chain_json, contact_id): (String, String) = conn
         .query_row(
-            "SELECT reviewer_chain FROM approved_drafts WHERE id = ?1 AND status = 'pending'",
+            "SELECT reviewer_chain, contact_id FROM approved_drafts WHERE id = ?1 AND status = 'pending'",
             params![id],
-            |r| r.get(0),
+            |r| Ok((r.get(0)?, r.get(1)?)),
         )
         .map_err(|_| anyhow::anyhow!("draft not found or not pending"))?;
+
+    // CRITICAL SAFETY CHECK: reviewer must NOT be the contact (high-conflict recipient)
+    if reviewer.eq_ignore_ascii_case(&contact_id) {
+        anyhow::bail!(
+            "BLOCKED: reviewer '{}' matches the contact_id. \
+             Drafts must be reviewed by the PRINCIPAL (system owner), \
+             never by the contact (high-conflict recipient).",
+            reviewer
+        );
+    }
 
     let mut chain: Vec<serde_json::Value> = serde_json::from_str(&chain_json).unwrap_or_default();
     chain.push(serde_json::json!({
