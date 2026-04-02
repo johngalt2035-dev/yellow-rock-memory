@@ -13,7 +13,6 @@ use rusqlite::{params, Connection};
 use sha2::{Digest, Sha256};
 use std::path::Path;
 
-use tracing;
 
 use crate::models::*;
 
