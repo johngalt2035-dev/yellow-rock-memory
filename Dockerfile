@@ -5,7 +5,7 @@
 # Run:    docker run -d -p 9077:9077 -e GRM_API_KEY=<key> -e GRM_PRINCIPAL_ID=<id> -v yrm-data:/data yellow-rock-memory
 
 # ---- Stage 1: Build ----
-FROM rust:1.82-slim-bookworm AS builder
+FROM rust:1.85-slim-bookworm AS builder
 
 RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
 
