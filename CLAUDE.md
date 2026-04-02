@@ -1,6 +1,6 @@
-# Grey Rock Memory Integration
+# Yellow Rock Memory Integration
 
-This project is `grey-rock-memory` -- a persistent memory daemon for Claude Code.
+This project is `yellow-rock-memory` -- a persistent memory daemon for Claude Code.
 
 ## Primary Integration: MCP Server
 
@@ -10,8 +10,8 @@ The recommended integration path is the **MCP tool server**. Configure in `~/.cl
 {
   "mcpServers": {
     "memory": {
-      "command": "grey-rock-memory",
-      "args": ["--db", "/path/to/grey-rock-memory.db", "mcp"]
+      "command": "yellow-rock-memory",
+      "args": ["--db", "/path/to/yellow-rock-memory.db", "mcp"]
     }
   }
 }
@@ -23,16 +23,16 @@ This gives Claude Code 8 native tools: `memory_store`, `memory_recall`, `memory_
 
 ## Alternative: CLI Integration
 
-The CLI binary is at `/opt/cybercommand/bin/grey-rock-memory` (or `grey-rock-memory` if in PATH).
+The CLI binary is at `/opt/cybercommand/bin/yellow-rock-memory` (or `yellow-rock-memory` if in PATH).
 
 ### At session start -- recall relevant context:
 ```bash
-grey-rock-memory --db /opt/cybercommand/grey-rock-memory.db recall "<current project or task context>"
+yellow-rock-memory --db /opt/cybercommand/yellow-rock-memory.db recall "<current project or task context>"
 ```
 
 ### When you learn something important -- store it:
 ```bash
-grey-rock-memory --db /opt/cybercommand/grey-rock-memory.db store \
+yellow-rock-memory --db /opt/cybercommand/yellow-rock-memory.db store \
   --tier long \
   --namespace "<project-name>" \
   --title "What you learned" \
@@ -48,7 +48,7 @@ grey-rock-memory --db /opt/cybercommand/grey-rock-memory.db store \
 
 ### When the user corrects you -- store as high-priority long-term:
 ```bash
-grey-rock-memory --db /opt/cybercommand/grey-rock-memory.db store \
+yellow-rock-memory --db /opt/cybercommand/yellow-rock-memory.db store \
   --tier long --priority 9 --source user \
   --title "User correction: <what>" \
   --content "<the correction and why>"

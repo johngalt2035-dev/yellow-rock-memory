@@ -1,4 +1,4 @@
-// Grey Rock Memory — Forensic Communication Archive
+// Yellow Rock Memory — Forensic Communication Archive
 // Copyright (c) 2026 johngalt2035-dev. All rights reserved.
 // Created by johngalt2035-dev + Anthropic Claude AI Code
 //
@@ -107,7 +107,7 @@ fn default_tier() -> Tier {
     Tier::Mid
 }
 fn default_namespace() -> String {
-    "grey-rock".to_string()
+    "yellow-rock".to_string()
 }
 fn default_priority() -> i32 {
     5
@@ -255,7 +255,7 @@ pub const SHORT_TTL_EXTEND_SECS: i64 = 3600;
 pub const MID_TTL_EXTEND_SECS: i64 = 86400;
 
 // ============================================================
-// Grey Rock: Message Archive & Escalation Models
+// Yellow Rock: Message Archive & Escalation Models
 // ============================================================
 
 /// Message categories for shadow logging
@@ -335,7 +335,7 @@ pub struct EscalationQuery {
 }
 
 // ============================================================
-// Grey Rock: Forensic Archive Models
+// Yellow Rock: Forensic Archive Models
 // ============================================================
 
 /// A single archived message with its forensic hash.
@@ -405,7 +405,7 @@ pub struct ArchiveVerification {
 }
 
 // ============================================================
-// Grey Rock: Approved Draft Models
+// Yellow Rock: Approved Draft Models
 // ============================================================
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

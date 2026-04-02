@@ -1,4 +1,4 @@
-// Grey Rock Memory — Forensic Communication Archive
+// Yellow Rock Memory — Forensic Communication Archive
 // Copyright (c) 2026 johngalt2035-dev. All rights reserved.
 // Created by johngalt2035-dev + Anthropic Claude AI Code
 //
@@ -36,7 +36,7 @@ pub async fn health(State(state): State<Db>) -> impl IntoResponse {
     };
     (
         code,
-        Json(json!({"status": if ok { "ok" } else { "error" }, "service": "grey-rock-memory"})),
+        Json(json!({"status": if ok { "ok" } else { "error" }, "service": "yellow-rock-memory"})),
     )
         .into_response()
 }
@@ -519,7 +519,7 @@ pub async fn bulk_create(
 }
 
 // ============================================================
-// Grey Rock: Message Archive & Escalation Handlers
+// Yellow Rock: Message Archive & Escalation Handlers
 // ============================================================
 
 pub async fn archive_message_handler(
@@ -656,7 +656,7 @@ pub async fn train_handler(
                     .collect()
             })
             .unwrap_or_default();
-        let namespace = entry["namespace"].as_str().unwrap_or("grey-rock");
+        let namespace = entry["namespace"].as_str().unwrap_or("yellow-rock");
         let priority = entry["priority"].as_i64().unwrap_or(7) as i32;
         let confidence = entry["confidence"].as_f64().unwrap_or(1.0);
         let source = entry["source"].as_str().unwrap_or("import");
@@ -719,7 +719,7 @@ pub async fn delete_link_handler(
 }
 
 // ============================================================
-// Grey Rock: Forensic Archive Handlers
+// Yellow Rock: Forensic Archive Handlers
 // ============================================================
 
 /// Create a forensic archive with SHA-256 hash chain.
@@ -838,7 +838,7 @@ pub async fn verify_db_handler(State(state): State<Db>) -> impl IntoResponse {
 }
 
 // ============================================================
-// Grey Rock: Draft Management Handlers
+// Yellow Rock: Draft Management Handlers
 // ============================================================
 
 pub async fn create_draft_handler(

@@ -2,7 +2,7 @@
 
 ## Architecture Overview
 
-`grey-rock-memory` is a single Rust binary that serves three roles:
+`yellow-rock-memory` is a single Rust binary that serves three roles:
 
 1. **MCP tool server** -- stdio JSON-RPC server exposing 8 memory tools for Claude Code
 2. **CLI tool** -- direct SQLite operations for store, recall, search, list, etc.
@@ -219,8 +219,8 @@ GET /health
 
 Deep health check: verifies DB is readable and FTS5 integrity-check passes.
 
-Response (200): `{"status": "ok", "service": "grey-rock-memory"}`
-Response (503): `{"status": "error", "service": "grey-rock-memory"}`
+Response (200): `{"status": "ok", "service": "yellow-rock-memory"}`
+Response (503): `{"status": "error", "service": "yellow-rock-memory"}`
 
 ### Create Memory
 
@@ -232,7 +232,7 @@ Content-Type: application/json
   "title": "Project uses Axum",
   "content": "The HTTP server is built with Axum 0.8.",
   "tier": "mid",
-  "namespace": "grey-rock-memory",
+  "namespace": "yellow-rock-memory",
   "tags": ["rust", "web"],
   "priority": 6,
   "confidence": 1.0,
@@ -247,7 +247,7 @@ Response (201):
 {
   "id": "a1b2c3d4-...",
   "tier": "mid",
-  "namespace": "grey-rock-memory",
+  "namespace": "yellow-rock-memory",
   "title": "Project uses Axum",
   "potential_contradictions": ["id1", "id2"]
 }
@@ -449,7 +449,7 @@ Validates each memory before import. Response: `{"imported": 50, "errors": []}`
 ## CLI Reference
 
 Global flags:
-- `--db <path>` -- database path (default: `grey-rock-memory.db`, env: `GREY_ROCK_MEMORY_DB`)
+- `--db <path>` -- database path (default: `yellow-rock-memory.db`, env: `GREY_ROCK_MEMORY_DB`)
 - `--json` -- output as machine-parseable JSON
 
 ### `serve`
@@ -457,7 +457,7 @@ Global flags:
 Start the HTTP daemon.
 
 ```bash
-grey-rock-memory serve --host 127.0.0.1 --port 9077
+yellow-rock-memory serve --host 127.0.0.1 --port 9077
 ```
 
 ### `mcp`
@@ -465,7 +465,7 @@ grey-rock-memory serve --host 127.0.0.1 --port 9077
 Run as an MCP tool server over stdio. This is the primary integration path for Claude Code.
 
 ```bash
-grey-rock-memory mcp
+yellow-rock-memory mcp
 ```
 
 Reads JSON-RPC from stdin, writes responses to stdout. Logs to stderr.
@@ -473,7 +473,7 @@ Reads JSON-RPC from stdin, writes responses to stdout. Logs to stderr.
 ### `store`
 
 ```bash
-grey-rock-memory store \
+yellow-rock-memory store \
   -T "Title" \
   -c "Content" \
   --tier mid \
@@ -489,25 +489,25 @@ Use `-c -` to read content from stdin. Validates all fields before writing.
 ### `update`
 
 ```bash
-grey-rock-memory update <id> -T "New title" -c "New content" --priority 8
+yellow-rock-memory update <id> -T "New title" -c "New content" --priority 8
 ```
 
 ### `recall`
 
 ```bash
-grey-rock-memory recall "search context" --namespace my-app --limit 10 --tags auth --since 2026-01-01T00:00:00Z
+yellow-rock-memory recall "search context" --namespace my-app --limit 10 --tags auth --since 2026-01-01T00:00:00Z
 ```
 
 ### `search`
 
 ```bash
-grey-rock-memory search "exact terms" --namespace my-app --tier long --limit 20 --since 2026-01-01 --until 2026-12-31 --tags rust
+yellow-rock-memory search "exact terms" --namespace my-app --tier long --limit 20 --since 2026-01-01 --until 2026-12-31 --tags rust
 ```
 
 ### `get`
 
 ```bash
-grey-rock-memory get <id>
+yellow-rock-memory get <id>
 ```
 
 Shows the memory plus all its links.
@@ -515,19 +515,19 @@ Shows the memory plus all its links.
 ### `list`
 
 ```bash
-grey-rock-memory list --namespace my-app --tier mid --limit 50 --since 2026-01-01 --until 2026-12-31 --tags devops
+yellow-rock-memory list --namespace my-app --tier mid --limit 50 --since 2026-01-01 --until 2026-12-31 --tags devops
 ```
 
 ### `delete`
 
 ```bash
-grey-rock-memory delete <id>
+yellow-rock-memory delete <id>
 ```
 
 ### `promote`
 
 ```bash
-grey-rock-memory promote <id>
+yellow-rock-memory promote <id>
 ```
 
 Promotes to long-term and clears expiry.
@@ -535,7 +535,7 @@ Promotes to long-term and clears expiry.
 ### `forget`
 
 ```bash
-grey-rock-memory forget --namespace my-app --pattern "old stuff" --tier short
+yellow-rock-memory forget --namespace my-app --pattern "old stuff" --tier short
 ```
 
 At least one filter is required.
@@ -543,7 +543,7 @@ At least one filter is required.
 ### `link`
 
 ```bash
-grey-rock-memory link <source-id> <target-id> --relation supersedes
+yellow-rock-memory link <source-id> <target-id> --relation supersedes
 ```
 
 Relation types: `related_to` (default), `supersedes`, `contradicts`, `derived_from`. Self-links rejected.
@@ -551,32 +551,32 @@ Relation types: `related_to` (default), `supersedes`, `contradicts`, `derived_fr
 ### `consolidate`
 
 ```bash
-grey-rock-memory consolidate "id1,id2,id3" -T "Summary title" -s "Consolidated content" --namespace my-app
+yellow-rock-memory consolidate "id1,id2,id3" -T "Summary title" -s "Consolidated content" --namespace my-app
 ```
 
 ### `gc`
 
 ```bash
-grey-rock-memory gc
+yellow-rock-memory gc
 ```
 
 ### `stats`
 
 ```bash
-grey-rock-memory stats
+yellow-rock-memory stats
 ```
 
 ### `namespaces`
 
 ```bash
-grey-rock-memory namespaces
+yellow-rock-memory namespaces
 ```
 
 ### `export` / `import`
 
 ```bash
-grey-rock-memory export > backup.json
-grey-rock-memory import < backup.json
+yellow-rock-memory export > backup.json
+yellow-rock-memory import < backup.json
 ```
 
 Export includes memories and links. Import validates each memory and skips invalid ones.
@@ -586,7 +586,7 @@ Export includes memories and links. Import validates each memory and skips inval
 Resolve a contradiction by marking one memory as superseding another.
 
 ```bash
-grey-rock-memory resolve <winner_id> <loser_id>
+yellow-rock-memory resolve <winner_id> <loser_id>
 ```
 
 Creates a "supersedes" link from winner to loser. Demotes the loser (priority=1, confidence=0.1). Touches the winner (bumps access count).
@@ -596,7 +596,7 @@ Creates a "supersedes" link from winner to loser. Demotes the loser (priority=1,
 Interactive REPL for browsing and managing memories.
 
 ```bash
-grey-rock-memory shell
+yellow-rock-memory shell
 ```
 
 REPL commands: `recall <ctx>`, `search <q>`, `list [ns]`, `get <id>`, `stats`, `namespaces`, `delete <id>`, `help`, `quit`. Color output with tier labels and priority bars.
@@ -606,7 +606,7 @@ REPL commands: `recall <ctx>`, `search <q>`, `list [ns]`, `get <id>`, `stats`, `
 Sync memories between two database files.
 
 ```bash
-grey-rock-memory sync <remote.db> --direction pull|push|merge
+yellow-rock-memory sync <remote.db> --direction pull|push|merge
 ```
 
 - `pull` -- import all memories from remote into local
@@ -620,7 +620,7 @@ Uses dedup-safe upsert (title+namespace). Links are synced alongside memories.
 Automatically group and consolidate memories.
 
 ```bash
-grey-rock-memory auto-consolidate [--namespace <ns>] [--short-only] [--min-count 3] [--dry-run]
+yellow-rock-memory auto-consolidate [--namespace <ns>] [--short-only] [--min-count 3] [--dry-run]
 ```
 
 Groups memories by namespace+primary tag. Groups with >= min_count members are consolidated into one long-term memory. Use `--dry-run` to preview.
@@ -630,16 +630,16 @@ Groups memories by namespace+primary tag. Groups with >= min_count members are c
 Generate roff man page to stdout.
 
 ```bash
-grey-rock-memory man           # print roff to stdout
-grey-rock-memory man | man -l -  # view immediately
+yellow-rock-memory man           # print roff to stdout
+yellow-rock-memory man | man -l -  # view immediately
 ```
 
 ### `completions`
 
 ```bash
-grey-rock-memory completions bash
-grey-rock-memory completions zsh
-grey-rock-memory completions fish
+yellow-rock-memory completions bash
+yellow-rock-memory completions zsh
+yellow-rock-memory completions fish
 ```
 
 ## Adding New Features
@@ -715,8 +715,8 @@ On tag push (e.g., `v0.2.0`):
 ## Building from Source
 
 ```bash
-git clone https://github.com/johngalt2035-dev/grey-rock-memory.git
-cd grey-rock-memory
+git clone https://github.com/johngalt2035-dev/yellow-rock-memory.git
+cd yellow-rock-memory
 
 # Debug build
 cargo build
@@ -724,7 +724,7 @@ cargo build
 # Release build (optimized, stripped)
 cargo build --release
 
-# The binary is at target/release/grey-rock-memory
+# The binary is at target/release/yellow-rock-memory
 ```
 
 Release profile settings (from `Cargo.toml`):

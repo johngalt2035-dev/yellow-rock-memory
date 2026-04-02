@@ -1,4 +1,4 @@
-// Grey Rock Memory — Forensic Communication Archive
+// Yellow Rock Memory — Forensic Communication Archive
 // Copyright (c) 2026 johngalt2035-dev. All rights reserved.
 // Created by johngalt2035-dev + Anthropic Claude AI Code
 //
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS schema_version (
     version INTEGER NOT NULL
 );
 
--- Grey Rock: Message archive for shadow logging with forensic integrity
+-- Yellow Rock: Message archive for shadow logging with forensic integrity
 CREATE TABLE IF NOT EXISTS messages (
     id               TEXT PRIMARY KEY,
     sender           TEXT NOT NULL,
@@ -116,7 +116,7 @@ CREATE TRIGGER IF NOT EXISTS messages_ad AFTER DELETE ON messages BEGIN
     VALUES ('delete', old.rowid, old.raw_content, COALESCE(old.extracted_logistics, ''));
 END;
 
--- Grey Rock: Approved draft tracking with forensic signing chain
+-- Yellow Rock: Approved draft tracking with forensic signing chain
 CREATE TABLE IF NOT EXISTS approved_drafts (
     id                  TEXT PRIMARY KEY,
     draft_hash          TEXT NOT NULL,
@@ -791,7 +791,7 @@ pub fn health_check(conn: &Connection) -> Result<bool> {
 }
 
 // ============================================================
-// Grey Rock: Message Archive & Escalation Analysis
+// Yellow Rock: Message Archive & Escalation Analysis
 // ============================================================
 
 /// Archive an incoming message with classification.
@@ -1039,7 +1039,7 @@ pub fn export_messages(
 }
 
 // ============================================================
-// Grey Rock: Forensic Archive System
+// Yellow Rock: Forensic Archive System
 // ============================================================
 
 /// Compute SHA-256 hash of a message's forensic fields.
@@ -1143,7 +1143,7 @@ pub fn create_forensic_archive(
 
     Ok(ForensicArchive {
         schema_version: "1.0".to_string(),
-        archive_type: "grey-rock-forensic-archive".to_string(),
+        archive_type: "yellow-rock-forensic-archive".to_string(),
         created_at: now,
         archive_period: ArchivePeriod {
             from: earliest,
@@ -1297,7 +1297,7 @@ pub fn verify_db_integrity(conn: &Connection) -> Result<(usize, usize, usize, Ve
 }
 
 // ============================================================
-// Grey Rock: Approved Draft Management
+// Yellow Rock: Approved Draft Management
 // ============================================================
 
 /// Compute SHA-256 hash for a draft.

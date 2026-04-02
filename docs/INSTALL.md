@@ -10,27 +10,27 @@
 ## Install from Source (One-Liner)
 
 ```bash
-cargo install --git https://github.com/johngalt2035-dev/grey-rock-memory.git
+cargo install --git https://github.com/johngalt2035-dev/yellow-rock-memory.git
 ```
 
-This builds a release binary and places it in `~/.cargo/bin/grey-rock-memory`.
+This builds a release binary and places it in `~/.cargo/bin/yellow-rock-memory`.
 
 Or clone and build locally:
 
 ```bash
-git clone https://github.com/johngalt2035-dev/grey-rock-memory.git
-cd grey-rock-memory
+git clone https://github.com/johngalt2035-dev/yellow-rock-memory.git
+cd yellow-rock-memory
 cargo install --path .
 ```
 
 ## Binary Download
 
-Pre-built binaries are available on the [Releases](https://github.com/johngalt2035-dev/grey-rock-memory/releases) page for Linux (x86_64) and macOS (aarch64). Download the tarball for your platform:
+Pre-built binaries are available on the [Releases](https://github.com/johngalt2035-dev/yellow-rock-memory/releases) page for Linux (x86_64) and macOS (aarch64). Download the tarball for your platform:
 
 ```bash
-tar xzf grey-rock-memory-x86_64-unknown-linux-gnu.tar.gz
-chmod +x grey-rock-memory
-sudo mv grey-rock-memory /usr/local/bin/
+tar xzf yellow-rock-memory-x86_64-unknown-linux-gnu.tar.gz
+chmod +x yellow-rock-memory
+sudo mv yellow-rock-memory /usr/local/bin/
 ```
 
 ## MCP Server Setup (Recommended)
@@ -45,21 +45,21 @@ Create or edit `~/.claude/.mcp.json` (global -- applies to all projects) or `.mc
 {
   "mcpServers": {
     "memory": {
-      "command": "grey-rock-memory",
-      "args": ["--db", "/path/to/grey-rock-memory.db", "mcp"]
+      "command": "yellow-rock-memory",
+      "args": ["--db", "/path/to/yellow-rock-memory.db", "mcp"]
     }
   }
 }
 ```
 
-If `grey-rock-memory` is not in your PATH, use the full path to the binary:
+If `yellow-rock-memory` is not in your PATH, use the full path to the binary:
 
 ```json
 {
   "mcpServers": {
     "memory": {
-      "command": "/usr/local/bin/grey-rock-memory",
-      "args": ["--db", "/var/lib/grey-rock-memory/grey-rock-memory.db", "mcp"]
+      "command": "/usr/local/bin/yellow-rock-memory",
+      "args": ["--db", "/var/lib/yellow-rock-memory/yellow-rock-memory.db", "mcp"]
     }
   }
 }
@@ -107,25 +107,25 @@ chmod +x ~/.claude/hooks/session-start.sh
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GREY_ROCK_MEMORY_DB` | `grey-rock-memory.db` | Path to the database |
-| `GREY_ROCK_MEMORY_BIN` | `grey-rock-memory` | Path to the binary |
+| `GREY_ROCK_MEMORY_DB` | `yellow-rock-memory.db` | Path to the database |
+| `GREY_ROCK_MEMORY_BIN` | `yellow-rock-memory` | Path to the binary |
 
 ## Systemd Service Setup (HTTP Daemon)
 
 If you want to run the HTTP daemon as a background service (alternative to MCP):
 
 ```bash
-sudo tee /etc/systemd/system/grey-rock-memory.service > /dev/null << 'EOF'
+sudo tee /etc/systemd/system/yellow-rock-memory.service > /dev/null << 'EOF'
 [Unit]
-Description=Grey Rock Memory Daemon
+Description=Yellow Rock Memory Daemon
 After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/grey-rock-memory --db /var/lib/grey-rock-memory/grey-rock-memory.db serve
+ExecStart=/usr/local/bin/yellow-rock-memory --db /var/lib/yellow-rock-memory/yellow-rock-memory.db serve
 Restart=on-failure
 RestartSec=5
-Environment=RUST_LOG=grey_rock_memory=info
+Environment=RUST_LOG=yellow_rock_memory=info
 
 # Graceful shutdown checkpoints the WAL
 KillSignal=SIGINT
@@ -139,30 +139,30 @@ EOF
 Create the data directory and enable the service:
 
 ```bash
-sudo mkdir -p /var/lib/grey-rock-memory
+sudo mkdir -p /var/lib/yellow-rock-memory
 sudo systemctl daemon-reload
-sudo systemctl enable --now grey-rock-memory
+sudo systemctl enable --now yellow-rock-memory
 ```
 
 ## Verify Installation
 
 ```bash
 # Check the binary
-grey-rock-memory --help
+yellow-rock-memory --help
 
 # If running as MCP server, test manually:
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | grey-rock-memory mcp
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | yellow-rock-memory mcp
 # Expected: JSON-RPC response with serverInfo
 
 # If running as HTTP daemon, check health:
 curl http://127.0.0.1:9077/api/v1/health
-# Expected: {"status":"ok","service":"grey-rock-memory"}
+# Expected: {"status":"ok","service":"yellow-rock-memory"}
 
 # Store a test memory via CLI
-grey-rock-memory store -T "Installation test" -c "It works." --tier short
+yellow-rock-memory store -T "Installation test" -c "It works." --tier short
 
 # Recall it
-grey-rock-memory recall "installation"
+yellow-rock-memory recall "installation"
 ```
 
 ## Man Page
@@ -171,12 +171,12 @@ Generate and install the man page:
 
 ```bash
 # View immediately
-grey-rock-memory man | man -l -
+yellow-rock-memory man | man -l -
 
 # Install system-wide
-grey-rock-memory man | sudo tee /usr/local/share/man/man1/grey-rock-memory.1 > /dev/null
+yellow-rock-memory man | sudo tee /usr/local/share/man/man1/yellow-rock-memory.1 > /dev/null
 sudo mandb
-man grey-rock-memory
+man yellow-rock-memory
 ```
 
 ## Shell Completions
@@ -185,28 +185,28 @@ Generate completions for your shell:
 
 ```bash
 # Bash
-grey-rock-memory completions bash > ~/.local/share/bash-completion/completions/grey-rock-memory
+yellow-rock-memory completions bash > ~/.local/share/bash-completion/completions/yellow-rock-memory
 
 # Zsh
-grey-rock-memory completions zsh > ~/.zfunc/_grey-rock-memory
+yellow-rock-memory completions zsh > ~/.zfunc/_yellow-rock-memory
 
 # Fish
-grey-rock-memory completions fish > ~/.config/fish/completions/grey-rock-memory.fish
+yellow-rock-memory completions fish > ~/.config/fish/completions/yellow-rock-memory.fish
 ```
 
 ## Multi-Node Sync Setup
 
-If you use grey-rock-memory on multiple machines (e.g., laptop and server), you can sync databases:
+If you use yellow-rock-memory on multiple machines (e.g., laptop and server), you can sync databases:
 
 ```bash
 # Pull memories from a remote database (e.g., over NFS, sshfs, or rsync'd copy)
-grey-rock-memory sync /mnt/server/grey-rock-memory.db --direction pull
+yellow-rock-memory sync /mnt/server/yellow-rock-memory.db --direction pull
 
 # Push local memories to remote
-grey-rock-memory sync /mnt/server/grey-rock-memory.db --direction push
+yellow-rock-memory sync /mnt/server/yellow-rock-memory.db --direction push
 
 # Bidirectional merge (both sides get all memories, dedup-safe)
-grey-rock-memory sync /mnt/server/grey-rock-memory.db --direction merge
+yellow-rock-memory sync /mnt/server/yellow-rock-memory.db --direction merge
 ```
 
 The sync operation uses the same dedup-safe upsert as regular stores -- title+namespace conflicts are resolved by keeping the higher priority and never downgrading tier.
@@ -215,26 +215,26 @@ The sync operation uses the same dedup-safe upsert as regular stores -- title+na
 
 ```bash
 # Stop and remove the service (if using systemd)
-sudo systemctl stop grey-rock-memory
-sudo systemctl disable grey-rock-memory
-sudo rm /etc/systemd/system/grey-rock-memory.service
+sudo systemctl stop yellow-rock-memory
+sudo systemctl disable yellow-rock-memory
+sudo rm /etc/systemd/system/yellow-rock-memory.service
 sudo systemctl daemon-reload
 
 # Remove MCP configuration from ~/.claude/.mcp.json or .mcp.json
 
 # Remove the binary
-cargo uninstall grey-rock-memory
-# or: sudo rm /usr/local/bin/grey-rock-memory
+cargo uninstall yellow-rock-memory
+# or: sudo rm /usr/local/bin/yellow-rock-memory
 
 # Remove the database (WARNING: deletes all memories)
-rm -f grey-rock-memory.db grey-rock-memory.db-wal grey-rock-memory.db-shm
+rm -f yellow-rock-memory.db yellow-rock-memory.db-wal yellow-rock-memory.db-shm
 # or if using the systemd path:
-# sudo rm -rf /var/lib/grey-rock-memory
+# sudo rm -rf /var/lib/yellow-rock-memory
 ```
 
 ## Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GREY_ROCK_MEMORY_DB` | `grey-rock-memory.db` | Path to the SQLite database file |
-| `RUST_LOG` | (none) | Log level filter (e.g., `grey_rock_memory=info,tower_http=info`) |
+| `GREY_ROCK_MEMORY_DB` | `yellow-rock-memory.db` | Path to the SQLite database file |
+| `RUST_LOG` | (none) | Log level filter (e.g., `yellow_rock_memory=info,tower_http=info`) |

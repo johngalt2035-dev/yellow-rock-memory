@@ -1,4 +1,4 @@
-// Grey Rock Memory — Forensic Communication Archive
+// Yellow Rock Memory — Forensic Communication Archive
 // Copyright (c) 2026 johngalt2035-dev. All rights reserved.
 // Created by johngalt2035-dev + Anthropic Claude AI Code
 //
@@ -24,7 +24,7 @@ fn binary_path() -> String {
         .expect("failed to get cargo metadata");
     let meta: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
     let target_dir = meta["target_directory"].as_str().unwrap().to_string();
-    format!("{}/release/grey-rock-memory", target_dir)
+    format!("{}/release/yellow-rock-memory", target_dir)
 }
 
 fn seed_memories(binary: &str, db_path: &str, count: usize) {
@@ -64,7 +64,7 @@ fn bench_recall(c: &mut Criterion) {
     let dir = std::env::temp_dir();
     let db_path = dir
         .join(format!(
-            "grey-rock-memory-bench-recall-{}.db",
+            "yellow-rock-memory-bench-recall-{}.db",
             uuid::Uuid::new_v4()
         ))
         .to_str()
@@ -136,7 +136,7 @@ fn bench_search(c: &mut Criterion) {
     let dir = std::env::temp_dir();
     let db_path = dir
         .join(format!(
-            "grey-rock-memory-bench-search-{}.db",
+            "yellow-rock-memory-bench-search-{}.db",
             uuid::Uuid::new_v4()
         ))
         .to_str()
@@ -187,7 +187,7 @@ fn bench_insert(c: &mut Criterion) {
     let dir = std::env::temp_dir();
     let db_path = dir
         .join(format!(
-            "grey-rock-memory-bench-insert-{}.db",
+            "yellow-rock-memory-bench-insert-{}.db",
             uuid::Uuid::new_v4()
         ))
         .to_str()

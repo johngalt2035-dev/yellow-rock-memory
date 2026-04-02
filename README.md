@@ -7,7 +7,7 @@
  |___/          |___/                                             |___/
 ```
 
-[![CI](https://github.com/johngalt2035-dev/grey-rock-memory/actions/workflows/ci.yml/badge.svg)](https://github.com/johngalt2035-dev/grey-rock-memory/actions/workflows/ci.yml)
+[![CI](https://github.com/johngalt2035-dev/yellow-rock-memory/actions/workflows/ci.yml/badge.svg)](https://github.com/johngalt2035-dev/yellow-rock-memory/actions/workflows/ci.yml)
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange?logo=rust)](https://www.rust-lang.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![SQLite](https://img.shields.io/badge/sqlite-FTS5-003B57?logo=sqlite)](https://www.sqlite.org/)
@@ -15,13 +15,13 @@
 [![MCP](https://img.shields.io/badge/MCP-11_tools-blueviolet)]()
 [![Version](https://img.shields.io/badge/version-3.0.0-orange)]()
 
-**Grey Rock memory system** -- structured message archival, escalation tracking, forensic documentation, and per-contact communication management for Executive Assistants utilizing the Grey Rock communications protocol. Works with any AI provider and any messaging platform (Signal, Telegram, WhatsApp, SMS). Built on SQLite + FTS5.
+**Yellow Rock memory system** -- structured message archival, escalation tracking, forensic documentation, and per-contact communication management for Executive Assistants utilizing the Yellow Rock communications protocol. Works with any AI provider and any messaging platform (Signal, Telegram, WhatsApp, SMS). Built on SQLite + FTS5.
 
 ---
 
 ## What Is This?
 
-`grey-rock-memory` is a Rust daemon that provides the memory backbone for AI agents running the [Grey Rock Protocol](https://github.com/johngalt2035-dev/grey-rock-protocol). It handles:
+`yellow-rock-memory` is a Rust daemon that provides the memory backbone for AI agents running the [Yellow Rock Protocol](https://github.com/johngalt2035-dev/yellow-rock-protocol). It handles:
 
 - **Shadow logging** -- archive all incoming messages with category tags (`LOGISTICS`, `NOISE`, `ESCALATION_ALERT`, `ACTION_REQUIRED`)
 - **Escalation tracking** -- quantified 1-10 scoring from message patterns (volume, frequency, tone over time windows)
@@ -40,7 +40,7 @@ Contact ──Channel──▶ Agent Gateway ──▶ AI Agent (any LLM)
           (Signal/Telegram/WhatsApp/SMS)
                                             │
                                             ▼
-                                  grey-rock-memory (port 9077)
+                                  yellow-rock-memory (port 9077)
                                        │
                                   ┌────┴────┐
                                   │ SQLite  │
@@ -60,29 +60,29 @@ Contact ──Channel──▶ Agent Gateway ──▶ AI Agent (any LLM)
 ```bash
 cargo install --path .
 # or
-cargo build --release && cp target/release/grey-rock-memory /usr/local/bin/
+cargo build --release && cp target/release/yellow-rock-memory /usr/local/bin/
 ```
 
 ### Start the daemon
 
 ```bash
-grey-rock-memory --db ~/grey-rock-memory.db serve --port 9077
+yellow-rock-memory --db ~/yellow-rock-memory.db serve --port 9077
 ```
 
 ### Train with background knowledge
 
 ```bash
 # From JSON (array of {title, content, tags?, priority?})
-grey-rock-memory --db ~/grey-rock-memory.db train background.json
+yellow-rock-memory --db ~/yellow-rock-memory.db train background.json
 
 # From Markdown (H1/H2 headings = titles, content underneath = memory)
-grey-rock-memory --db ~/grey-rock-memory.db train knowledge.md
+yellow-rock-memory --db ~/yellow-rock-memory.db train knowledge.md
 
 # Dry run first
-grey-rock-memory --db ~/grey-rock-memory.db train data.json --dry-run
+yellow-rock-memory --db ~/yellow-rock-memory.db train data.json --dry-run
 
 # Multiple files at once
-grey-rock-memory --db ~/grey-rock-memory.db train people.json schedule.md triggers.json
+yellow-rock-memory --db ~/yellow-rock-memory.db train people.json schedule.md triggers.json
 ```
 
 ### Archive a message
@@ -104,7 +104,7 @@ curl "http://localhost:9077/api/v1/escalation?sender=contact-a"
 
 ```bash
 # Via CLI
-grey-rock-memory --db ~/grey-rock-memory.db digest --sender "contact-a" --since 24h
+yellow-rock-memory --db ~/yellow-rock-memory.db digest --sender "contact-a" --since 24h
 
 # Via HTTP
 curl "http://localhost:9077/api/v1/digest?sender=contact-a&since=2026-03-30T00:00:00Z"
@@ -113,7 +113,7 @@ curl "http://localhost:9077/api/v1/digest?sender=contact-a&since=2026-03-30T00:0
 ### Verify a claim ("you said X")
 
 ```bash
-grey-rock-memory --db ~/grey-rock-memory.db recall "tuition payment"
+yellow-rock-memory --db ~/yellow-rock-memory.db recall "tuition payment"
 ```
 
 ## MCP Integration
@@ -123,9 +123,9 @@ Configure as an MCP tool server for Claude Code:
 ```json
 {
   "mcpServers": {
-    "grey-rock": {
-      "command": "grey-rock-memory",
-      "args": ["--db", "/path/to/grey-rock-memory.db", "mcp"]
+    "yellow-rock": {
+      "command": "yellow-rock-memory",
+      "args": ["--db", "/path/to/yellow-rock-memory.db", "mcp"]
     }
   }
 }
@@ -166,7 +166,7 @@ Exposes **11 tools**:
 | GET | `/api/v1/links/{id}` | Get links |
 | DELETE | `/api/v1/links/{s}/{t}` | Delete link |
 
-### Grey Rock
+### Yellow Rock
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/v1/train` | Bulk training import |
@@ -225,14 +225,14 @@ Each H1/H2 heading becomes a memory title. Content under each heading becomes th
 ## Deployment (macOS launchd)
 
 ```xml
-<!-- ~/Library/LaunchAgents/com.example.grey-rock-memory.plist -->
+<!-- ~/Library/LaunchAgents/com.example.yellow-rock-memory.plist -->
 <plist version="1.0">
 <dict>
-    <key>Label</key><string>com.example.grey-rock-memory</string>
+    <key>Label</key><string>com.example.yellow-rock-memory</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/bin/grey-rock-memory</string>
-        <string>--db</string><string>/path/to/grey-rock-memory.db</string>
+        <string>/usr/local/bin/yellow-rock-memory</string>
+        <string>--db</string><string>/path/to/yellow-rock-memory.db</string>
         <string>serve</string><string>--port</string><string>9077</string>
     </array>
     <key>RunAtLoad</key><true/>
@@ -288,11 +288,11 @@ approved_drafts table:
 3. **Layer 3 (Cycle)**: archive → verify → purge → reimport → verify -- complete chain of provenance
 
 ```bash
-grey-rock-memory verify-db                              # Check all DB rows
-grey-rock-memory archive-messages -o archive.json       # Export with hashes
-grey-rock-memory verify-archive archive.json            # Verify archive integrity
-grey-rock-memory import-archive archive.json            # Reimport (rejects tampered)
-grey-rock-memory purge-messages --yes                   # Purge after archival
+yellow-rock-memory verify-db                              # Check all DB rows
+yellow-rock-memory archive-messages -o archive.json       # Export with hashes
+yellow-rock-memory verify-archive archive.json            # Verify archive integrity
+yellow-rock-memory import-archive archive.json            # Reimport (rejects tampered)
+yellow-rock-memory purge-messages --yes                   # Purge after archival
 ```
 
 Retention: 365 days in SQLite, then archive + purge.
@@ -300,12 +300,12 @@ Configurable: set `retention_days` in config for SEC (3-6yr), SOX (7yr), litigat
 
 ## Symbiotic System
 
-Grey Rock Memory is designed to work with [Grey Rock Protocol](https://github.com/johngalt2035-dev/grey-rock-protocol) as a symbiotic system. Both are built upon [OpenClaw](https://openclaw.ai).
+Yellow Rock Memory is designed to work with [Yellow Rock Protocol](https://github.com/johngalt2035-dev/yellow-rock-protocol) as a symbiotic system. Both are built upon [OpenClaw](https://openclaw.ai).
 
 | Component | Role |
 |---|---|
-| **Grey Rock Memory** | Data backbone. Forensic archive. Escalation scoring. Training facility. SHA-256 chain. |
-| **[Grey Rock Protocol](https://github.com/johngalt2035-dev/grey-rock-protocol)** | Communication rules. BIFF templates. Anti-JADE/DARVO. Legal framework. |
+| **Yellow Rock Memory** | Data backbone. Forensic archive. Escalation scoring. Training facility. SHA-256 chain. |
+| **[Yellow Rock Protocol](https://github.com/johngalt2035-dev/yellow-rock-protocol)** | Communication rules. BIFF templates. Anti-JADE/DARVO. Legal framework. |
 | **[OpenClaw](https://openclaw.ai)** | Agent orchestration. Channel routing. Cron scheduling. LLM management. |
 
 ## Legal

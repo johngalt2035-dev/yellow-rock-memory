@@ -1,4 +1,4 @@
-// Grey Rock Memory — Forensic Communication Archive
+// Yellow Rock Memory — Forensic Communication Archive
 // Copyright (c) 2026 johngalt2035-dev. All rights reserved.
 // Created by johngalt2035-dev + Anthropic Claude AI Code
 //

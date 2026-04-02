@@ -1,4 +1,4 @@
-// Grey Rock Memory — Forensic Communication Archive
+// Yellow Rock Memory — Forensic Communication Archive
 // Copyright (c) 2026 johngalt2035-dev. All rights reserved.
 // Created by johngalt2035-dev + Anthropic Claude AI Code
 //
@@ -35,7 +35,7 @@ use tracing_subscriber::EnvFilter;
 
 use crate::models::Tier;
 
-const DEFAULT_DB: &str = "grey-rock-memory.db";
+const DEFAULT_DB: &str = "yellow-rock-memory.db";
 const DEFAULT_PORT: u16 = 9077;
 const GC_INTERVAL_SECS: u64 = 1800;
 
@@ -82,8 +82,8 @@ async fn draft_auth_middleware(
 
 #[derive(Parser)]
 #[command(
-    name = "grey-rock-memory",
-    about = "Grey Rock memory system — structured message archival, escalation tracking, and logistics extraction"
+    name = "yellow-rock-memory",
+    about = "Yellow Rock memory system — structured message archival, escalation tracking, and logistics extraction"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -147,7 +147,7 @@ enum Command {
     Man,
     /// Train: bulk-import background knowledge from JSON or Markdown files into long-term memory
     Train(TrainArgs),
-    /// Generate a logistics digest for a sender (Grey Rock)
+    /// Generate a logistics digest for a sender (Yellow Rock)
     Digest(DigestArgs),
     /// Create a forensic archive of messages with SHA-256 hash chain
     ArchiveMessages(ArchiveMessagesArgs),
@@ -167,7 +167,7 @@ struct TrainArgs {
     #[arg(required = true)]
     files: Vec<String>,
     /// Namespace for imported memories
-    #[arg(long, short, default_value = "grey-rock")]
+    #[arg(long, short, default_value = "yellow-rock")]
     namespace: String,
     /// Source tag for imported memories
     #[arg(long, short = 'S', default_value = "import")]
@@ -494,7 +494,7 @@ async fn main() -> Result<()> {
             generate(
                 a.shell,
                 &mut Cli::command(),
-                "grey-rock-memory",
+                "yellow-rock-memory",
                 &mut std::io::stdout(),
             );
             Ok(())
@@ -995,7 +995,7 @@ async fn serve(db_path: PathBuf, args: ServeArgs) -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
             EnvFilter::from_default_env()
-                .add_directive("grey_rock_memory=info".parse()?)
+                .add_directive("yellow_rock_memory=info".parse()?)
                 .add_directive("tower_http=info".parse()?),
         )
         .init();
@@ -1049,7 +1049,7 @@ async fn serve(db_path: PathBuf, args: ServeArgs) -> Result<()> {
         .route("/api/v1/gc", post(handlers::run_gc))
         .route("/api/v1/export", get(handlers::export_memories))
         .route("/api/v1/import", post(handlers::import_memories))
-        // Grey Rock: Message Archive, Escalation & Training
+        // Yellow Rock: Message Archive, Escalation & Training
         .route("/api/v1/train", post(handlers::train_handler))
         .route("/api/v1/messages", post(handlers::archive_message_handler))
         .route(
@@ -1061,7 +1061,7 @@ async fn serve(db_path: PathBuf, args: ServeArgs) -> Result<()> {
             get(handlers::escalation_score_handler),
         )
         .route("/api/v1/digest", get(handlers::digest_handler))
-        // Grey Rock: Forensic Archive
+        // Yellow Rock: Forensic Archive
         .route("/api/v1/archive", get(handlers::create_archive_handler))
         .route(
             "/api/v1/archive/verify",
@@ -1079,7 +1079,7 @@ async fn serve(db_path: PathBuf, args: ServeArgs) -> Result<()> {
         .layer(TraceLayer::new_for_http())
         .with_state(state.clone());
 
-    // Grey Rock: Draft Management — PRINCIPAL-ONLY, gated by API key auth.
+    // Yellow Rock: Draft Management — PRINCIPAL-ONLY, gated by API key auth.
     // All draft endpoints require Authorization: Bearer <GRM_API_KEY>.
     // Without --api-key / GRM_API_KEY, draft endpoints return 403 Forbidden.
     let api_key_for_middleware = args.api_key.clone().unwrap_or_default();
@@ -1113,7 +1113,7 @@ async fn serve(db_path: PathBuf, args: ServeArgs) -> Result<()> {
     let app = app.merge(draft_routes);
 
     let addr = format!("{}:{}", args.host, args.port);
-    tracing::info!("grey-rock-memory listening on {addr}");
+    tracing::info!("yellow-rock-memory listening on {addr}");
     tracing::info!("database: {}", db_path.display());
 
     let listener = tokio::net::TcpListener::bind(&addr).await?;
@@ -1679,7 +1679,7 @@ fn cmd_shell(db_path: PathBuf) -> Result<()> {
     let conn = db::open(&db_path)?;
     println!(
         "{}",
-        color::bold("grey-rock-memory shell — type 'help' for commands, 'quit' to exit")
+        color::bold("yellow-rock-memory shell — type 'help' for commands, 'quit' to exit")
     );
     let stdin = std::io::stdin();
     loop {

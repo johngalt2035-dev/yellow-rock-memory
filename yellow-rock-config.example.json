@@ -1,5 +1,5 @@
 {
-  "_comment": "Grey Rock v3.0 Configuration — edit this file and run your setup",
+  "_comment": "Yellow Rock v3.0 Configuration — edit this file and run your setup",
   "version": "3.0",
 
   "communication_style": {
@@ -20,7 +20,7 @@
       "channels": ["signal", "sms"],
       "primary_channel": "signal",
       "communication_style": "executive",
-      "protocol": "grey-rock",
+      "protocol": "yellow-rock",
       "escalation_threshold": 7,
       "notes": "High-conflict counterparty. Full BIFF protocol."
     },
@@ -31,7 +31,7 @@
       "channels": ["whatsapp"],
       "primary_channel": "whatsapp",
       "communication_style": "executive",
-      "protocol": "grey-rock",
+      "protocol": "yellow-rock",
       "escalation_threshold": 5,
       "notes": "High-conflict counterparty. Grey rock on property disputes."
     },
@@ -62,7 +62,7 @@
   },
 
   "memory": {
-    "db_path": "~/.grey-rock/memory.db",
+    "db_path": "~/.yellow-rock/memory.db",
     "port": 9077,
     "retention_days": 365
   },

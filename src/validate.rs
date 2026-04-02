@@ -1,4 +1,4 @@
-// Grey Rock Memory — Forensic Communication Archive
+// Yellow Rock Memory — Forensic Communication Archive
 // Copyright (c) 2026 johngalt2035-dev. All rights reserved.
 // Created by johngalt2035-dev + Anthropic Claude AI Code
 //
@@ -309,7 +309,7 @@ pub fn validate_consolidate(
 }
 
 // ============================================================
-// Grey Rock: Message Archive Validation
+// Yellow Rock: Message Archive Validation
 // ============================================================
 
 const VALID_CATEGORIES: &[&str] = &[

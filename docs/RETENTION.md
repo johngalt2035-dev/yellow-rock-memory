@@ -1,6 +1,6 @@
 # Data Retention Guide
 
-Grey Rock Memory supports configurable data retention to meet regulatory and legal requirements.
+Yellow Rock Memory supports configurable data retention to meet regulatory and legal requirements.
 
 ## Default Retention
 
@@ -8,7 +8,7 @@ Messages are retained for **365 days** (1 year) by default. After the retention 
 
 ## Regulatory Retention Presets
 
-Configure `retention_days` in your `grey-rock-config.json` to match your regulatory requirement:
+Configure `retention_days` in your `yellow-rock-config.json` to match your regulatory requirement:
 
 | Standard | Retention | Days | Applies To |
 |---|---|---|---|
@@ -23,7 +23,7 @@ Configure `retention_days` in your `grey-rock-config.json` to match your regulat
 
 ## Configuration
 
-In your `grey-rock-config.json`:
+In your `yellow-rock-config.json`:
 
 ```json
 "retention": {
@@ -40,7 +40,7 @@ In your `grey-rock-config.json`:
 }
 ```
 
-Or use the CLI: `grey-rock-memory archive-messages --before 2023-01-01`
+Or use the CLI: `yellow-rock-memory archive-messages --before 2023-01-01`
 
 ## Archive Lifecycle
 

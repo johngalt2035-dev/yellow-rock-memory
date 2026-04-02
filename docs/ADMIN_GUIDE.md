@@ -12,8 +12,8 @@ Configure in `~/.claude/.mcp.json` (global -- applies to all projects) or `.mcp.
 {
   "mcpServers": {
     "memory": {
-      "command": "/usr/local/bin/grey-rock-memory",
-      "args": ["--db", "/var/lib/grey-rock-memory/grey-rock-memory.db", "mcp"]
+      "command": "/usr/local/bin/yellow-rock-memory",
+      "args": ["--db", "/var/lib/yellow-rock-memory/yellow-rock-memory.db", "mcp"]
     }
   }
 }
@@ -32,7 +32,7 @@ The MCP server:
 Run the HTTP daemon directly in the foreground:
 
 ```bash
-grey-rock-memory --db /path/to/grey-rock-memory.db serve
+yellow-rock-memory --db /path/to/yellow-rock-memory.db serve
 ```
 
 The daemon listens on `127.0.0.1:9077` by default.
@@ -40,17 +40,17 @@ The daemon listens on `127.0.0.1:9077` by default.
 ### Systemd (Production HTTP Daemon)
 
 ```bash
-sudo tee /etc/systemd/system/grey-rock-memory.service > /dev/null << 'EOF'
+sudo tee /etc/systemd/system/yellow-rock-memory.service > /dev/null << 'EOF'
 [Unit]
-Description=Grey Rock Memory Daemon
+Description=Yellow Rock Memory Daemon
 After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/grey-rock-memory --db /var/lib/grey-rock-memory/grey-rock-memory.db serve
+ExecStart=/usr/local/bin/yellow-rock-memory --db /var/lib/yellow-rock-memory/yellow-rock-memory.db serve
 Restart=on-failure
 RestartSec=5
-Environment=RUST_LOG=grey_rock_memory=info,tower_http=info
+Environment=RUST_LOG=yellow_rock_memory=info,tower_http=info
 
 # Graceful shutdown: checkpoints WAL before exit
 KillSignal=SIGINT
@@ -60,16 +60,16 @@ TimeoutStopSec=10
 WantedBy=multi-user.target
 EOF
 
-sudo mkdir -p /var/lib/grey-rock-memory
+sudo mkdir -p /var/lib/yellow-rock-memory
 sudo systemctl daemon-reload
-sudo systemctl enable --now grey-rock-memory
+sudo systemctl enable --now yellow-rock-memory
 ```
 
 Check status:
 
 ```bash
-sudo systemctl status grey-rock-memory
-sudo journalctl -u grey-rock-memory -f
+sudo systemctl status yellow-rock-memory
+sudo journalctl -u yellow-rock-memory -f
 ```
 
 ### Docker
@@ -83,17 +83,17 @@ COPY . .
 RUN cargo build --release
 
 FROM debian:bookworm-slim
-COPY --from=builder /src/target/release/grey-rock-memory /usr/local/bin/
+COPY --from=builder /src/target/release/yellow-rock-memory /usr/local/bin/
 VOLUME /data
 EXPOSE 9077
-CMD ["grey-rock-memory", "--db", "/data/grey-rock-memory.db", "serve"]
+CMD ["yellow-rock-memory", "--db", "/data/yellow-rock-memory.db", "serve"]
 ```
 
 Build and run:
 
 ```bash
-docker build -t grey-rock-memory .
-docker run -d -p 127.0.0.1:9077:9077 -v grey-rock-memory-data:/data grey-rock-memory
+docker build -t yellow-rock-memory .
+docker run -d -p 127.0.0.1:9077:9077 -v yellow-rock-memory-data:/data yellow-rock-memory
 ```
 
 ## Configuration
@@ -102,7 +102,7 @@ docker run -d -p 127.0.0.1:9077:9077 -v grey-rock-memory-data:/data grey-rock-me
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--db <path>` | `grey-rock-memory.db` | Path to SQLite database |
+| `--db <path>` | `yellow-rock-memory.db` | Path to SQLite database |
 | `--host <addr>` | `127.0.0.1` | Bind address (serve only) |
 | `--port <port>` | `9077` | Bind port (serve only) |
 | `--json` | `false` | JSON output for CLI commands |
@@ -111,8 +111,8 @@ docker run -d -p 127.0.0.1:9077:9077 -v grey-rock-memory-data:/data grey-rock-me
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GREY_ROCK_MEMORY_DB` | `grey-rock-memory.db` | Database path (overridden by `--db`) |
-| `RUST_LOG` | (none) | Logging filter (e.g., `grey_rock_memory=info,tower_http=debug`) |
+| `GREY_ROCK_MEMORY_DB` | `yellow-rock-memory.db` | Database path (overridden by `--db`) |
+| `RUST_LOG` | (none) | Logging filter (e.g., `yellow_rock_memory=info,tower_http=debug`) |
 
 ### Compile-Time Constants
 
@@ -156,22 +156,22 @@ The database uses these pragmas (set automatically on open):
 **Live backup (while daemon is running):**
 
 ```bash
-sqlite3 /path/to/grey-rock-memory.db ".backup /path/to/backup.db"
+sqlite3 /path/to/yellow-rock-memory.db ".backup /path/to/backup.db"
 ```
 
 **JSON export (includes links):**
 
 ```bash
-grey-rock-memory --db /path/to/grey-rock-memory.db export > backup.json
+yellow-rock-memory --db /path/to/yellow-rock-memory.db export > backup.json
 ```
 
 **File copy (daemon must be stopped or use WAL checkpoint first):**
 
 ```bash
-systemctl stop grey-rock-memory
-cp /path/to/grey-rock-memory.db /path/to/backup.db
-cp /path/to/grey-rock-memory.db-wal /path/to/backup.db-wal 2>/dev/null
-systemctl start grey-rock-memory
+systemctl stop yellow-rock-memory
+cp /path/to/yellow-rock-memory.db /path/to/backup.db
+cp /path/to/yellow-rock-memory.db-wal /path/to/backup.db-wal 2>/dev/null
+systemctl start yellow-rock-memory
 ```
 
 ### Restore
@@ -179,15 +179,15 @@ systemctl start grey-rock-memory
 **From JSON (preserves links):**
 
 ```bash
-grey-rock-memory --db /path/to/new.db import < backup.json
+yellow-rock-memory --db /path/to/new.db import < backup.json
 ```
 
 **From SQLite backup:**
 
 ```bash
-systemctl stop grey-rock-memory
-cp /path/to/backup.db /var/lib/grey-rock-memory/grey-rock-memory.db
-systemctl start grey-rock-memory
+systemctl stop yellow-rock-memory
+cp /path/to/backup.db /var/lib/yellow-rock-memory/yellow-rock-memory.db
+systemctl start yellow-rock-memory
 ```
 
 ### Migration
@@ -202,7 +202,7 @@ Manually trigger garbage collection:
 
 ```bash
 # Via CLI
-grey-rock-memory gc
+yellow-rock-memory gc
 
 # Via API
 curl -X POST http://127.0.0.1:9077/api/v1/gc
@@ -211,13 +211,13 @@ curl -X POST http://127.0.0.1:9077/api/v1/gc
 Compact the database (reduces file size after many deletions):
 
 ```bash
-sqlite3 /path/to/grey-rock-memory.db "VACUUM"
+sqlite3 /path/to/yellow-rock-memory.db "VACUUM"
 ```
 
 Rebuild the FTS index (if it becomes corrupt):
 
 ```bash
-sqlite3 /path/to/grey-rock-memory.db "INSERT INTO memories_fts(memories_fts) VALUES('rebuild')"
+sqlite3 /path/to/yellow-rock-memory.db "INSERT INTO memories_fts(memories_fts) VALUES('rebuild')"
 ```
 
 ## Monitoring
@@ -232,8 +232,8 @@ The health check performs a **deep verification**:
 1. Database is readable (runs `SELECT COUNT(*) FROM memories`)
 2. FTS5 index integrity check (`INSERT INTO memories_fts(memories_fts) VALUES('integrity-check')`)
 
-Returns `200 OK` with `{"status": "ok", "service": "grey-rock-memory"}` if healthy.
-Returns `503 Service Unavailable` with `{"status": "error", "service": "grey-rock-memory"}` if the database or FTS index is unhealthy.
+Returns `200 OK` with `{"status": "ok", "service": "yellow-rock-memory"}` if healthy.
+Returns `503 Service Unavailable` with `{"status": "error", "service": "yellow-rock-memory"}` if the database or FTS index is unhealthy.
 
 ### Stats Endpoint
 
@@ -256,12 +256,12 @@ The MCP server logs to stderr. Monitor via:
 ```bash
 # If running via Claude Code, check Claude Code's MCP logs
 # If running manually:
-grey-rock-memory mcp 2>mcp-server.log
+yellow-rock-memory mcp 2>mcp-server.log
 ```
 
 Key log messages:
-- `grey-rock-memory MCP server started (stdio)` -- server is ready
-- `grey-rock-memory MCP server stopped` -- stdin closed, server exiting
+- `yellow-rock-memory MCP server started (stdio)` -- server is ready
+- `yellow-rock-memory MCP server stopped` -- stdin closed, server exiting
 
 ### Logs
 
@@ -269,20 +269,20 @@ The HTTP daemon logs via `tracing` with configurable levels:
 
 ```bash
 # Info level (default recommended)
-RUST_LOG=grey_rock_memory=info,tower_http=info grey-rock-memory serve
+RUST_LOG=yellow_rock_memory=info,tower_http=info yellow-rock-memory serve
 
 # Debug level (verbose, includes all HTTP requests)
-RUST_LOG=grey_rock_memory=debug,tower_http=debug grey-rock-memory serve
+RUST_LOG=yellow_rock_memory=debug,tower_http=debug yellow-rock-memory serve
 
 # Trace level (extremely verbose)
-RUST_LOG=grey_rock_memory=trace grey-rock-memory serve
+RUST_LOG=yellow_rock_memory=trace yellow-rock-memory serve
 ```
 
 With systemd, logs go to the journal:
 
 ```bash
-sudo journalctl -u grey-rock-memory -f
-sudo journalctl -u grey-rock-memory --since "1 hour ago"
+sudo journalctl -u yellow-rock-memory -f
+sudo journalctl -u yellow-rock-memory --since "1 hour ago"
 ```
 
 ### Monitoring Script Example
@@ -291,8 +291,8 @@ sudo journalctl -u grey-rock-memory --since "1 hour ago"
 #!/bin/bash
 HEALTH=$(curl -sf http://127.0.0.1:9077/api/v1/health | jq -r '.status')
 if [ "$HEALTH" != "ok" ]; then
-    echo "grey-rock-memory health check failed"
-    systemctl restart grey-rock-memory
+    echo "yellow-rock-memory health check failed"
+    systemctl restart yellow-rock-memory
 fi
 ```
 
@@ -318,7 +318,7 @@ Triggered by tags matching `v*` (e.g., `v0.1.0`):
 1. Builds release binaries for:
    - `x86_64-unknown-linux-gnu` (Ubuntu)
    - `aarch64-apple-darwin` (macOS ARM)
-2. Packages each as `grey-rock-memory-<target>.tar.gz`
+2. Packages each as `yellow-rock-memory-<target>.tar.gz`
 3. Creates a GitHub Release with the artifacts
 
 ### Running CI Locally
@@ -339,20 +339,20 @@ For multi-machine deployments (e.g., laptop + server, or multiple workstations),
 
 ```bash
 # Pull remote changes to local
-grey-rock-memory sync /mnt/shared/grey-rock-memory.db --direction pull
+yellow-rock-memory sync /mnt/shared/yellow-rock-memory.db --direction pull
 
 # Push local changes to remote
-grey-rock-memory sync /mnt/shared/grey-rock-memory.db --direction push
+yellow-rock-memory sync /mnt/shared/yellow-rock-memory.db --direction push
 
 # Bidirectional merge (recommended)
-grey-rock-memory sync /mnt/shared/grey-rock-memory.db --direction merge
+yellow-rock-memory sync /mnt/shared/yellow-rock-memory.db --direction merge
 ```
 
 ### Automated Sync via Cron
 
 ```bash
 # Sync every 15 minutes (bidirectional merge)
-*/15 * * * * /usr/local/bin/grey-rock-memory --db /var/lib/grey-rock-memory/grey-rock-memory.db sync /mnt/shared/remote-memory.db --direction merge --json >> /var/log/grey-rock-memory-sync.log 2>&1
+*/15 * * * * /usr/local/bin/yellow-rock-memory --db /var/lib/yellow-rock-memory/yellow-rock-memory.db sync /mnt/shared/remote-memory.db --direction merge --json >> /var/log/yellow-rock-memory-sync.log 2>&1
 ```
 
 Sync uses the same dedup-safe upsert as regular stores:
@@ -368,13 +368,13 @@ If the remote database is on another machine, mount it or copy it first:
 ```bash
 # Option 1: sshfs mount
 mkdir -p /mnt/remote-memory
-sshfs user@server:/var/lib/grey-rock-memory /mnt/remote-memory
-grey-rock-memory sync /mnt/remote-memory/grey-rock-memory.db --direction merge
+sshfs user@server:/var/lib/yellow-rock-memory /mnt/remote-memory
+yellow-rock-memory sync /mnt/remote-memory/yellow-rock-memory.db --direction merge
 
 # Option 2: rsync + sync + rsync
-rsync -a server:/var/lib/grey-rock-memory/grey-rock-memory.db /tmp/remote.db
-grey-rock-memory sync /tmp/remote.db --direction merge
-rsync -a /tmp/remote.db server:/var/lib/grey-rock-memory/grey-rock-memory.db
+rsync -a server:/var/lib/yellow-rock-memory/yellow-rock-memory.db /tmp/remote.db
+yellow-rock-memory sync /tmp/remote.db --direction merge
+rsync -a /tmp/remote.db server:/var/lib/yellow-rock-memory/yellow-rock-memory.db
 ```
 
 ## Auto-Consolidation (Maintenance)
@@ -385,20 +385,20 @@ Auto-consolidation groups memories by namespace and primary tag, then merges gro
 
 ```bash
 # Preview what would be consolidated
-grey-rock-memory auto-consolidate --dry-run
+yellow-rock-memory auto-consolidate --dry-run
 
 # Consolidate all namespaces (groups of 3+)
-grey-rock-memory auto-consolidate
+yellow-rock-memory auto-consolidate
 
 # Only short-term memories, minimum 5 per group
-grey-rock-memory auto-consolidate --short-only --min-count 5
+yellow-rock-memory auto-consolidate --short-only --min-count 5
 ```
 
 ### Cron Schedule
 
 ```bash
 # Run auto-consolidation daily at 3am, short-term memories only
-0 3 * * * /usr/local/bin/grey-rock-memory --db /var/lib/grey-rock-memory/grey-rock-memory.db auto-consolidate --short-only --json >> /var/log/grey-rock-memory-consolidate.log 2>&1
+0 3 * * * /usr/local/bin/yellow-rock-memory --db /var/lib/yellow-rock-memory/yellow-rock-memory.db auto-consolidate --short-only --json >> /var/log/yellow-rock-memory-consolidate.log 2>&1
 ```
 
 ## Man Page
@@ -406,14 +406,14 @@ grey-rock-memory auto-consolidate --short-only --min-count 5
 Install the man page for system-wide documentation:
 
 ```bash
-grey-rock-memory man | sudo tee /usr/local/share/man/man1/grey-rock-memory.1 > /dev/null
+yellow-rock-memory man | sudo tee /usr/local/share/man/man1/yellow-rock-memory.1 > /dev/null
 sudo mandb
-man grey-rock-memory
+man yellow-rock-memory
 ```
 
 ## Scaling Considerations
 
-`grey-rock-memory` is designed for single-machine use. It is not a distributed system.
+`yellow-rock-memory` is designed for single-machine use. It is not a distributed system.
 
 - **Concurrency**: The daemon uses `Arc<Mutex<Connection>>` -- one write at a time, but this is fine for a single-user tool. SQLite WAL mode allows concurrent reads.
 - **MCP concurrency**: The MCP server is single-threaded (synchronous stdio loop), one request at a time. This is by design -- Claude Code sends one request at a time.
@@ -429,19 +429,19 @@ man grey-rock-memory
 ```bash
 ss -tlnp | grep 9077
 # Kill the existing process or use a different port
-grey-rock-memory serve --port 9078
+yellow-rock-memory serve --port 9078
 ```
 
 **Database locked:**
 ```bash
 # Remove stale WAL files (only if daemon is not running)
-rm -f grey-rock-memory.db-wal grey-rock-memory.db-shm
+rm -f yellow-rock-memory.db-wal yellow-rock-memory.db-shm
 ```
 
 **Permission denied:**
 ```bash
 # Check file permissions
-ls -la /path/to/grey-rock-memory.db
+ls -la /path/to/yellow-rock-memory.db
 # Ensure the user running the daemon has read/write access
 ```
 
@@ -462,10 +462,10 @@ If recall or search is slow:
 
 ```bash
 # Rebuild the FTS index
-sqlite3 /path/to/grey-rock-memory.db "INSERT INTO memories_fts(memories_fts) VALUES('rebuild')"
+sqlite3 /path/to/yellow-rock-memory.db "INSERT INTO memories_fts(memories_fts) VALUES('rebuild')"
 
 # Compact the database
-sqlite3 /path/to/grey-rock-memory.db "VACUUM"
+sqlite3 /path/to/yellow-rock-memory.db "VACUUM"
 ```
 
 ### FTS index corruption
@@ -474,33 +474,33 @@ Symptoms: search returns no results or errors.
 
 ```bash
 # Check integrity
-sqlite3 /path/to/grey-rock-memory.db "INSERT INTO memories_fts(memories_fts) VALUES('integrity-check')"
+sqlite3 /path/to/yellow-rock-memory.db "INSERT INTO memories_fts(memories_fts) VALUES('integrity-check')"
 
 # Rebuild if corrupt
-sqlite3 /path/to/grey-rock-memory.db "INSERT INTO memories_fts(memories_fts) VALUES('rebuild')"
+sqlite3 /path/to/yellow-rock-memory.db "INSERT INTO memories_fts(memories_fts) VALUES('rebuild')"
 ```
 
 ### Database is growing too large
 
 ```bash
 # Check what's taking space
-grey-rock-memory stats
+yellow-rock-memory stats
 
 # Delete expired memories
-grey-rock-memory gc
+yellow-rock-memory gc
 
 # Delete all short-term memories in a namespace
-grey-rock-memory forget --tier short --namespace my-app
+yellow-rock-memory forget --tier short --namespace my-app
 
 # Compact after deletion
-sqlite3 /path/to/grey-rock-memory.db "VACUUM"
+sqlite3 /path/to/yellow-rock-memory.db "VACUUM"
 ```
 
 ## Security
 
 ### Localhost Binding
 
-By default, the HTTP daemon binds to `127.0.0.1` only. It is **not accessible from the network**. This is intentional -- `grey-rock-memory` is a local-machine tool.
+By default, the HTTP daemon binds to `127.0.0.1` only. It is **not accessible from the network**. This is intentional -- `yellow-rock-memory` is a local-machine tool.
 
 The MCP server communicates over stdio only -- no network exposure.
 
@@ -530,7 +530,7 @@ All write paths go through the validation layer (`validate.rs`):
 ### WAL Files
 
 SQLite WAL mode creates two additional files alongside the database:
-- `grey-rock-memory.db-wal` -- write-ahead log
-- `grey-rock-memory.db-shm` -- shared memory file
+- `yellow-rock-memory.db-wal` -- write-ahead log
+- `yellow-rock-memory.db-shm` -- shared memory file
 
 Both are cleaned up on graceful shutdown (the daemon runs `PRAGMA wal_checkpoint(TRUNCATE)` on SIGINT). If the daemon crashes, these files persist but are automatically recovered on next open.

@@ -1,16 +1,16 @@
 # Installation Guide
 
-Install grey-rock-memory on any platform. Pick your operating system below.
+Install yellow-rock-memory on any platform. Pick your operating system below.
 
 > **No programming experience?** Skip to [AI-Assisted Installation](AI-INSTALL.md) — let ChatGPT, Claude, or your AI assistant do it for you.
 
-> **Documentation Map**: You are here → **INSTALL.md**. Next → [SETUP.md](SETUP.md) (configure contacts). Then → [AI-INSTALL.md](AI-INSTALL.md) (connect to AI + test). Also see → [Grey Rock Protocol](https://github.com/johngalt2035-dev/grey-rock-protocol) (communication templates).
+> **Documentation Map**: You are here → **INSTALL.md**. Next → [SETUP.md](SETUP.md) (configure contacts). Then → [AI-INSTALL.md](AI-INSTALL.md) (connect to AI + test). Also see → [Yellow Rock Protocol](https://github.com/johngalt2035-dev/yellow-rock-protocol) (communication templates).
 
 ---
 
 ## What You're Installing
 
-Grey Rock Memory is a program that stores and organizes messages for the Grey Rock communication system. It runs in the background on your computer and provides a database that your AI assistant can use.
+Yellow Rock Memory is a program that stores and organizes messages for the Yellow Rock communication system. It runs in the background on your computer and provides a database that your AI assistant can use.
 
 **You need**: ~3 GB free disk space, 4 GB RAM, and an internet connection for the initial download.
 
@@ -44,45 +44,45 @@ rustc --version  # Should show: rustc 1.x.x
 
 ```bash
 # 4. Download the source code
-git clone https://github.com/johngalt2035-dev/grey-rock-memory.git
-cd grey-rock-memory
+git clone https://github.com/johngalt2035-dev/yellow-rock-memory.git
+cd yellow-rock-memory
 
 # 5. Build it (this takes 5-20 minutes the first time — that's normal!)
 cargo build --release
 
 # 6. Install the program
 #    On Apple Silicon (M1/M2/M3/M4 Macs):
-sudo cp target/release/grey-rock-memory /opt/homebrew/bin/
+sudo cp target/release/yellow-rock-memory /opt/homebrew/bin/
 #    On Intel Macs:
-#    sudo cp target/release/grey-rock-memory /usr/local/bin/
+#    sudo cp target/release/yellow-rock-memory /usr/local/bin/
 # (sudo will ask for your password — type it and press Enter, nothing will appear as you type)
 
 # 7. Verify it works
-grey-rock-memory --help
-# You should see "Grey Rock memory system" and a list of commands
+yellow-rock-memory --help
+# You should see "Yellow Rock memory system" and a list of commands
 ```
 
 ### Start the Memory System
 
 ```bash
 # 8. Create the database folder
-mkdir -p ~/.grey-rock
+mkdir -p ~/.yellow-rock
 
 # 9. Start it
-grey-rock-memory --db ~/.grey-rock/memory.db serve --port 9077
+yellow-rock-memory --db ~/.yellow-rock/memory.db serve --port 9077
 
 # 10. Open a NEW terminal window and test:
 curl http://localhost:9077/api/v1/health
-# Should show: {"status":"ok","service":"grey-rock-memory"}
+# Should show: {"status":"ok","service":"yellow-rock-memory"}
 ```
 
 ### Run Automatically at Login (Optional)
 
-Create `~/Library/LaunchAgents/com.grey-rock.memory.plist` — see [auto-start guide](https://github.com/johngalt2035-dev/grey-rock-memory/blob/main/SETUP.md#auto-start).
+Create `~/Library/LaunchAgents/com.yellow-rock.memory.plist` — see [auto-start guide](https://github.com/johngalt2035-dev/yellow-rock-memory/blob/main/SETUP.md#auto-start).
 
 Or simply add to your `~/.zshrc`:
 ```bash
-echo 'grey-rock-memory --db ~/.grey-rock/memory.db serve --port 9077 &' >> ~/.zshrc
+echo 'yellow-rock-memory --db ~/.yellow-rock/memory.db serve --port 9077 &' >> ~/.zshrc
 ```
 
 ---
@@ -119,15 +119,15 @@ git --version    # Should show: git version 2.x.x
 rustc --version  # Should show: rustc 1.x.x
 
 # 2. Download the source code
-git clone https://github.com/johngalt2035-dev/grey-rock-memory.git
-cd grey-rock-memory
+git clone https://github.com/johngalt2035-dev/yellow-rock-memory.git
+cd yellow-rock-memory
 
 # 3. Build it (5-20 minutes the first time — that's normal!)
 cargo build --release
 
 # 4. Create a bin folder and copy the program there
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\bin"
-Copy-Item "target\release\grey-rock-memory.exe" "$env:USERPROFILE\bin\"
+Copy-Item "target\release\yellow-rock-memory.exe" "$env:USERPROFILE\bin\"
 
 # 5. Add to PATH (so you can run it from anywhere)
 $oldPath = [Environment]::GetEnvironmentVariable("Path", "User")
@@ -135,7 +135,7 @@ $newPath = "$oldPath;$env:USERPROFILE\bin"
 [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
 
 # 6. RESTART PowerShell (close and reopen it), then verify:
-grey-rock-memory --help
+yellow-rock-memory --help
 ```
 
 > **Windows Firewall**: When you start the daemon, Windows may show a firewall popup. Click **"Allow access"** — the program only listens on your local machine.
@@ -144,14 +144,14 @@ grey-rock-memory --help
 
 ```powershell
 # 7. Create the database folder
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.grey-rock"
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.yellow-rock"
 
 # 8. Start it
-grey-rock-memory --db "$env:USERPROFILE\.grey-rock\memory.db" serve --port 9077
+yellow-rock-memory --db "$env:USERPROFILE\.yellow-rock\memory.db" serve --port 9077
 
 # 9. Open a NEW PowerShell window and test:
 Invoke-WebRequest http://localhost:9077/api/v1/health | Select-Object -ExpandProperty Content
-# Should show: {"status":"ok","service":"grey-rock-memory"}
+# Should show: {"status":"ok","service":"yellow-rock-memory"}
 ```
 
 ### Alternative: Windows Subsystem for Linux (WSL)
@@ -170,8 +170,8 @@ wsl --install
 # Create a startup shortcut
 $WshShell = New-Object -ComObject WScript.Shell
 $Shortcut = $WshShell.CreateShortcut("$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\GreyRockMemory.lnk")
-$Shortcut.TargetPath = "$env:USERPROFILE\bin\grey-rock-memory.exe"
-$Shortcut.Arguments = "--db $env:USERPROFILE\.grey-rock\memory.db serve --port 9077"
+$Shortcut.TargetPath = "$env:USERPROFILE\bin\yellow-rock-memory.exe"
+$Shortcut.Arguments = "--db $env:USERPROFILE\.yellow-rock\memory.db serve --port 9077"
 $Shortcut.Save()
 ```
 
@@ -197,44 +197,44 @@ source "$HOME/.cargo/env"
 git --version && rustc --version
 
 # 4. Download and build (5-20 minutes first time!)
-git clone https://github.com/johngalt2035-dev/grey-rock-memory.git
-cd grey-rock-memory
+git clone https://github.com/johngalt2035-dev/yellow-rock-memory.git
+cd yellow-rock-memory
 cargo build --release
 
 # 5. Install
-sudo cp target/release/grey-rock-memory /usr/local/bin/
+sudo cp target/release/yellow-rock-memory /usr/local/bin/
 
 # 6. Verify
-grey-rock-memory --help
+yellow-rock-memory --help
 ```
 
 ### Start the Memory System
 
 ```bash
 # 7. Create database folder
-mkdir -p ~/.grey-rock
+mkdir -p ~/.yellow-rock
 
 # 8. Start
-grey-rock-memory --db ~/.grey-rock/memory.db serve --port 9077
+yellow-rock-memory --db ~/.yellow-rock/memory.db serve --port 9077
 
 # 9. Test (in another terminal)
 curl http://localhost:9077/api/v1/health
-# Should show: {"status":"ok","service":"grey-rock-memory"}
+# Should show: {"status":"ok","service":"yellow-rock-memory"}
 ```
 
 ### Run Automatically (systemd)
 
 ```bash
 # Create service file
-sudo tee /etc/systemd/system/grey-rock-memory.service << 'EOF'
+sudo tee /etc/systemd/system/yellow-rock-memory.service << 'EOF'
 [Unit]
-Description=Grey Rock Memory System
+Description=Yellow Rock Memory System
 After=network.target
 
 [Service]
 Type=simple
 User=YOUR_USERNAME
-ExecStart=/usr/local/bin/grey-rock-memory --db /home/YOUR_USERNAME/.grey-rock/memory.db serve --port 9077
+ExecStart=/usr/local/bin/yellow-rock-memory --db /home/YOUR_USERNAME/.yellow-rock/memory.db serve --port 9077
 Restart=always
 RestartSec=5
 
@@ -243,13 +243,13 @@ WantedBy=multi-user.target
 EOF
 
 # Replace YOUR_USERNAME with your actual username:
-sudo sed -i "s/YOUR_USERNAME/$USER/g" /etc/systemd/system/grey-rock-memory.service
+sudo sed -i "s/YOUR_USERNAME/$USER/g" /etc/systemd/system/yellow-rock-memory.service
 
 # Enable and start
 sudo systemctl daemon-reload
-sudo systemctl enable grey-rock-memory
-sudo systemctl start grey-rock-memory
-sudo systemctl status grey-rock-memory
+sudo systemctl enable yellow-rock-memory
+sudo systemctl start yellow-rock-memory
+sudo systemctl status yellow-rock-memory
 ```
 
 ---
@@ -316,13 +316,13 @@ Create a file called `background.json` (use any text editor — Notepad, TextEdi
 
 Import it:
 ```bash
-grey-rock-memory --db ~/.grey-rock/memory.db train background.json
-# Should show: Imported 2 memories into namespace "grey-rock" (skipped 0)
+yellow-rock-memory --db ~/.yellow-rock/memory.db train background.json
+# Should show: Imported 2 memories into namespace "yellow-rock" (skipped 0)
 ```
 
 **You can also use Markdown** — simpler for longer content:
 ```bash
-grey-rock-memory --db ~/.grey-rock/memory.db train background.md
+yellow-rock-memory --db ~/.yellow-rock/memory.db train background.md
 ```
 
 Where `background.md` looks like:
@@ -350,7 +350,7 @@ Save as `background.yaml`:
   priority: 8
 ```
 
-Import: `grey-rock-memory --db ~/.grey-rock/memory.db train background.yaml`
+Import: `yellow-rock-memory --db ~/.yellow-rock/memory.db train background.yaml`
 
 YAML is often easier to write by hand — no brackets, no quoted keys, no trailing commas to worry about.
 
@@ -359,14 +359,14 @@ YAML is often easier to write by hand — no brackets, no quoted keys, no traili
 ```bash
 # Check health
 curl http://localhost:9077/api/v1/health
-# ✅ {"status":"ok","service":"grey-rock-memory"}
+# ✅ {"status":"ok","service":"yellow-rock-memory"}
 
 # Check stats
-grey-rock-memory --db ~/.grey-rock/memory.db stats
+yellow-rock-memory --db ~/.yellow-rock/memory.db stats
 # ✅ Shows memory count, tiers, namespaces
 
 # Test recall
-grey-rock-memory --db ~/.grey-rock/memory.db recall "conference call"
+yellow-rock-memory --db ~/.yellow-rock/memory.db recall "conference call"
 # ✅ Returns the training data you imported
 ```
 
@@ -414,8 +414,8 @@ Train the system to match your preferred tone per contact.
 
 Import style training the same way:
 ```bash
-grey-rock-memory --db ~/.grey-rock/memory.db train style-personal.json
-grey-rock-memory --db ~/.grey-rock/memory.db train style-executive.json
+yellow-rock-memory --db ~/.yellow-rock/memory.db train style-personal.json
+yellow-rock-memory --db ~/.yellow-rock/memory.db train style-executive.json
 ```
 
 ---
@@ -424,25 +424,25 @@ grey-rock-memory --db ~/.grey-rock/memory.db train style-executive.json
 
 1. **Configure your contacts** → [SETUP.md](SETUP.md)
 2. **Connect to your AI assistant** → [AI-INSTALL.md](AI-INSTALL.md)
-3. **Get the communication protocol** → [Grey Rock Protocol](https://github.com/johngalt2035-dev/grey-rock-protocol)
+3. **Get the communication protocol** → [Yellow Rock Protocol](https://github.com/johngalt2035-dev/yellow-rock-protocol)
 
 ---
 
 ## Troubleshooting
 
-**"command not found: grey-rock-memory"**
+**"command not found: yellow-rock-memory"**
 - Make sure the binary is in your PATH
-- macOS: `ls /opt/homebrew/bin/grey-rock-memory` or `ls /usr/local/bin/grey-rock-memory`
-- Windows: `ls $env:USERPROFILE\bin\grey-rock-memory.exe`
-- Linux: `ls /usr/local/bin/grey-rock-memory`
+- macOS: `ls /opt/homebrew/bin/yellow-rock-memory` or `ls /usr/local/bin/yellow-rock-memory`
+- Windows: `ls $env:USERPROFILE\bin\yellow-rock-memory.exe`
+- Linux: `ls /usr/local/bin/yellow-rock-memory`
 
 **"failed to open database"**
-- Create the directory: `mkdir -p ~/.grey-rock` (Mac/Linux) or `New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.grey-rock"` (Windows)
+- Create the directory: `mkdir -p ~/.yellow-rock` (Mac/Linux) or `New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.yellow-rock"` (Windows)
 
 **"port 9077 already in use"**
 - Another instance is running. Kill it:
-  - Mac/Linux: `pkill grey-rock-memory`
-  - Windows: `Stop-Process -Name grey-rock-memory`
+  - Mac/Linux: `pkill yellow-rock-memory`
+  - Windows: `Stop-Process -Name yellow-rock-memory`
 
 **Build fails with "linker cc not found"**
 - macOS: `xcode-select --install`
@@ -464,8 +464,8 @@ grey-rock-memory --db ~/.grey-rock/memory.db train style-executive.json
 
 **Windows Firewall blocks the daemon**
 - Click "Allow access" when the popup appears
-- Or manually: Windows Security > Firewall > Allow an app > grey-rock-memory
+- Or manually: Windows Security > Firewall > Allow an app > yellow-rock-memory
 
 ---
 
-*Grey Rock Memory works with [Grey Rock Protocol](https://github.com/johngalt2035-dev/grey-rock-protocol). Both are built upon [OpenClaw](https://openclaw.ai). See [LICENSE](LICENSE) and [LEGAL_DISCLAIMER.md](LEGAL_DISCLAIMER.md) for terms.*
+*Yellow Rock Memory works with [Yellow Rock Protocol](https://github.com/johngalt2035-dev/yellow-rock-protocol). Both are built upon [OpenClaw](https://openclaw.ai). See [LICENSE](LICENSE) and [LEGAL_DISCLAIMER.md](LEGAL_DISCLAIMER.md) for terms.*

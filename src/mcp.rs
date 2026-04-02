@@ -1,4 +1,4 @@
-// Grey Rock Memory — Forensic Communication Archive
+// Yellow Rock Memory — Forensic Communication Archive
 // Copyright (c) 2026 johngalt2035-dev. All rights reserved.
 // Created by johngalt2035-dev + Anthropic Claude AI Code
 //
@@ -7,7 +7,7 @@
 // DISCLAIMER: This software is provided "AS IS", without warranty of any kind.
 // Not legal advice. See LEGAL_DISCLAIMER.md for complete terms.
 
-//! MCP (Model Context Protocol) server for grey-rock-memory.
+//! MCP (Model Context Protocol) server for yellow-rock-memory.
 //! Exposes memory operations as native Claude Code tools over stdio JSON-RPC.
 
 use serde::{Deserialize, Serialize};
@@ -447,7 +447,7 @@ fn handle_stats(conn: &rusqlite::Connection, db_path: &Path) -> Result<Value, St
     serde_json::to_value(stats).map_err(|e| e.to_string())
 }
 
-// --- Grey Rock: MCP tool handlers ---
+// --- Yellow Rock: MCP tool handlers ---
 
 fn handle_archive_message(conn: &rusqlite::Connection, params: &Value) -> Result<Value, String> {
     let sender = params["sender"].as_str().ok_or("sender is required")?;
@@ -506,7 +506,7 @@ fn handle_digest(conn: &rusqlite::Connection, params: &Value) -> Result<Value, S
     }))
 }
 
-// --- Grey Rock: Draft MCP tool handlers ---
+// --- Yellow Rock: Draft MCP tool handlers ---
 
 fn handle_create_draft(conn: &rusqlite::Connection, params: &Value) -> Result<Value, String> {
     let contact_id = params["contact_id"].as_str().ok_or("contact_id required")?;
@@ -602,7 +602,7 @@ fn handle_request(
                 "protocolVersion": "2024-11-05",
                 "capabilities": { "tools": {} },
                 "serverInfo": {
-                    "name": "grey-rock-memory",
+                    "name": "yellow-rock-memory",
                     "version": env!("CARGO_PKG_VERSION")
                 }
             }),
@@ -667,7 +667,7 @@ pub fn run_mcp_server(db_path: &Path) -> anyhow::Result<()> {
     let mut stdout = io::stdout();
     let principal_id = std::env::var("GRM_PRINCIPAL_ID").ok();
 
-    eprintln!("grey-rock-memory MCP server started (stdio)");
+    eprintln!("yellow-rock-memory MCP server started (stdio)");
     if principal_id.is_some() {
         eprintln!("  principal_id enforcement: ENABLED");
     } else {
@@ -705,6 +705,6 @@ pub fn run_mcp_server(db_path: &Path) -> anyhow::Result<()> {
         stdout.flush()?;
     }
 
-    eprintln!("grey-rock-memory MCP server stopped");
+    eprintln!("yellow-rock-memory MCP server stopped");
     Ok(())
 }

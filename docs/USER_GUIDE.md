@@ -2,7 +2,7 @@
 
 ## What Is This and Why Do I Need It?
 
-`grey-rock-memory` gives Claude Code persistent memory across sessions. Without it, every conversation starts from zero. With it, Claude can:
+`yellow-rock-memory` gives Claude Code persistent memory across sessions. Without it, every conversation starts from zero. With it, Claude can:
 
 - Remember your project architecture, preferences, and past decisions
 - Recall debugging context from yesterday
@@ -13,7 +13,7 @@ Think of it as a brain for your AI assistant -- short-term for what you're doing
 
 ## MCP Integration (Recommended)
 
-The easiest way to use grey-rock-memory is as an **MCP tool server**. Once configured, Claude Code can store and recall memories natively without any manual CLI usage.
+The easiest way to use yellow-rock-memory is as an **MCP tool server**. Once configured, Claude Code can store and recall memories natively without any manual CLI usage.
 
 ### Setup
 
@@ -23,8 +23,8 @@ Add to `~/.claude/.mcp.json` (global -- applies to all projects) or `.mcp.json` 
 {
   "mcpServers": {
     "memory": {
-      "command": "grey-rock-memory",
-      "args": ["--db", "/path/to/grey-rock-memory.db", "mcp"]
+      "command": "yellow-rock-memory",
+      "args": ["--db", "/path/to/yellow-rock-memory.db", "mcp"]
     }
   }
 }
@@ -52,7 +52,7 @@ Claude uses these tools automatically during conversations. You can also ask Cla
 ### Store Your First Memory
 
 ```bash
-grey-rock-memory store \
+yellow-rock-memory store \
   -T "Project uses PostgreSQL 15" \
   -c "The main database is PostgreSQL 15 with pgvector for embeddings." \
   --tier long \
@@ -64,7 +64,7 @@ That's it. The memory is now stored permanently (long tier) with priority 7/10.
 ### Recall Memories
 
 ```bash
-grey-rock-memory recall "database setup"
+yellow-rock-memory recall "database setup"
 ```
 
 This performs a fuzzy OR search across all your memories and returns the most relevant ones, ranked by a 6-factor composite score:
@@ -84,7 +84,7 @@ Recall also automatically:
 ### Search for Exact Matches
 
 ```bash
-grey-rock-memory search "PostgreSQL"
+yellow-rock-memory search "PostgreSQL"
 ```
 
 Search uses AND semantics -- all terms must match. Use this when you know exactly what you're looking for. Search uses the same 6-factor ranking but without the tier boost.
@@ -111,20 +111,20 @@ Namespaces isolate memories per project. If you omit `--namespace`, it auto-dete
 
 ```bash
 # These are equivalent when run inside a git repo named "my-app":
-grey-rock-memory store -T "API uses REST" -c "..." --namespace my-app
-grey-rock-memory store -T "API uses REST" -c "..."  # auto-detects "my-app"
+yellow-rock-memory store -T "API uses REST" -c "..." --namespace my-app
+yellow-rock-memory store -T "API uses REST" -c "..."  # auto-detects "my-app"
 ```
 
 List all namespaces:
 
 ```bash
-grey-rock-memory namespaces
+yellow-rock-memory namespaces
 ```
 
 Filter recall or search to a specific namespace:
 
 ```bash
-grey-rock-memory recall "auth flow" --namespace my-app
+yellow-rock-memory recall "auth flow" --namespace my-app
 ```
 
 ## Memory Linking
@@ -132,7 +132,7 @@ grey-rock-memory recall "auth flow" --namespace my-app
 Connect related memories with typed relations:
 
 ```bash
-grey-rock-memory link <source-id> <target-id> --relation supersedes
+yellow-rock-memory link <source-id> <target-id> --relation supersedes
 ```
 
 Relation types:
@@ -144,13 +144,13 @@ Relation types:
 When you `get` a memory, its links are shown alongside it:
 
 ```bash
-grey-rock-memory get <id>
+yellow-rock-memory get <id>
 # Shows the memory plus all its links
 ```
 
 ## Contradiction Detection
 
-When you store a memory, grey-rock-memory automatically checks for existing memories in the same namespace with similar titles. If potential contradictions are found, you get a warning:
+When you store a memory, yellow-rock-memory automatically checks for existing memories in the same namespace with similar titles. If potential contradictions are found, you get a warning:
 
 ```
 stored: abc123 [long] (ns=my-app)
@@ -164,7 +164,7 @@ In JSON mode (`--json`), the response includes `potential_contradictions` with t
 After accumulating scattered memories about a topic, merge them into a single long-term summary:
 
 ```bash
-grey-rock-memory consolidate "id1,id2,id3" \
+yellow-rock-memory consolidate "id1,id2,id3" \
   -T "Auth system architecture" \
   -s "JWT tokens with refresh rotation, RBAC via middleware, sessions in Redis."
 ```
@@ -181,7 +181,7 @@ Consolidation:
 Recall context relevant to what you're about to work on:
 
 ```bash
-grey-rock-memory recall "auth module refactor" --namespace my-app --limit 5
+yellow-rock-memory recall "auth module refactor" --namespace my-app --limit 5
 ```
 
 ### Learning Something New
@@ -189,7 +189,7 @@ grey-rock-memory recall "auth module refactor" --namespace my-app --limit 5
 When you discover something important during a session:
 
 ```bash
-grey-rock-memory store \
+yellow-rock-memory store \
   -T "Rate limiter uses token bucket" \
   -c "The rate limiter in middleware.rs uses a token bucket algorithm with 100 req/min default." \
   --tier mid --priority 6
@@ -200,7 +200,7 @@ grey-rock-memory store \
 When the user corrects you, store it as high-priority long-term:
 
 ```bash
-grey-rock-memory store \
+yellow-rock-memory store \
   -T "User correction: always use snake_case for API fields" \
   -c "The user prefers snake_case for all JSON API response fields, not camelCase." \
   --tier long --priority 9 --source user
@@ -211,7 +211,7 @@ grey-rock-memory store \
 If a mid-tier memory turns out to be permanently valuable:
 
 ```bash
-grey-rock-memory promote <memory-id>
+yellow-rock-memory promote <memory-id>
 ```
 
 ### Bulk Cleanup
@@ -219,13 +219,13 @@ grey-rock-memory promote <memory-id>
 Delete all short-term memories in a namespace:
 
 ```bash
-grey-rock-memory forget --namespace my-app --tier short
+yellow-rock-memory forget --namespace my-app --tier short
 ```
 
 Delete memories matching a pattern:
 
 ```bash
-grey-rock-memory forget --pattern "deprecated API"
+yellow-rock-memory forget --pattern "deprecated API"
 ```
 
 ### Time-Filtered Queries
@@ -233,25 +233,25 @@ grey-rock-memory forget --pattern "deprecated API"
 List memories created in the last week:
 
 ```bash
-grey-rock-memory list --since 2026-03-23T00:00:00Z
+yellow-rock-memory list --since 2026-03-23T00:00:00Z
 ```
 
 Search within a date range:
 
 ```bash
-grey-rock-memory search "migration" --since 2026-01-01T00:00:00Z --until 2026-03-01T00:00:00Z
+yellow-rock-memory search "migration" --since 2026-01-01T00:00:00Z --until 2026-03-01T00:00:00Z
 ```
 
 ### Export and Backup
 
 ```bash
-grey-rock-memory export > memories-backup.json
+yellow-rock-memory export > memories-backup.json
 ```
 
 Restore (preserves links):
 
 ```bash
-grey-rock-memory import < memories-backup.json
+yellow-rock-memory import < memories-backup.json
 ```
 
 ## Priority Guide
@@ -268,7 +268,7 @@ grey-rock-memory import < memories-backup.json
 Confidence (0.0 to 1.0) indicates how certain a memory is. Default is 1.0. Lower confidence for things that might change:
 
 ```bash
-grey-rock-memory store \
+yellow-rock-memory store \
   -T "API might switch to GraphQL" \
   -c "Team is evaluating GraphQL migration." \
   --confidence 0.5
@@ -296,8 +296,8 @@ Every memory tracks its source. Valid sources:
 Tag memories for filtered retrieval:
 
 ```bash
-grey-rock-memory store -T "Deploy process" -c "..." --tags "devops,ci,deploy"
-grey-rock-memory recall "deployment" --tags "devops"
+yellow-rock-memory store -T "Deploy process" -c "..." --tags "devops,ci,deploy"
+yellow-rock-memory recall "deployment" --tags "devops"
 ```
 
 ## Interactive Shell
@@ -305,7 +305,7 @@ grey-rock-memory recall "deployment" --tags "devops"
 The `shell` command opens a REPL (read-eval-print loop) for browsing and managing memories interactively. Output uses color-coded tier labels and priority bars.
 
 ```bash
-grey-rock-memory shell
+yellow-rock-memory shell
 ```
 
 Available REPL commands:
@@ -342,13 +342,13 @@ Sync memories between two SQLite database files. Useful for keeping laptop and s
 
 ```bash
 # Pull all memories from remote database into local
-grey-rock-memory sync /path/to/remote.db --direction pull
+yellow-rock-memory sync /path/to/remote.db --direction pull
 
 # Push local memories to remote database
-grey-rock-memory sync /path/to/remote.db --direction push
+yellow-rock-memory sync /path/to/remote.db --direction push
 
 # Bidirectional merge -- both databases end up with all memories
-grey-rock-memory sync /path/to/remote.db --direction merge
+yellow-rock-memory sync /path/to/remote.db --direction merge
 ```
 
 Sync uses the same dedup-safe upsert as regular stores:
@@ -360,13 +360,13 @@ Sync uses the same dedup-safe upsert as regular stores:
 
 ```bash
 # On laptop, mount remote DB (e.g., via sshfs or rsync'd copy)
-scp server:/var/lib/grey-rock-memory/grey-rock-memory.db /tmp/remote-memory.db
+scp server:/var/lib/yellow-rock-memory/yellow-rock-memory.db /tmp/remote-memory.db
 
 # Merge both ways
-grey-rock-memory sync /tmp/remote-memory.db --direction merge
+yellow-rock-memory sync /tmp/remote-memory.db --direction merge
 
 # Copy merged remote back
-scp /tmp/remote-memory.db server:/var/lib/grey-rock-memory/grey-rock-memory.db
+scp /tmp/remote-memory.db server:/var/lib/yellow-rock-memory/yellow-rock-memory.db
 ```
 
 ## Auto-Consolidation
@@ -375,16 +375,16 @@ Automatically group memories by namespace and primary tag, then consolidate grou
 
 ```bash
 # Dry run -- see what would be consolidated
-grey-rock-memory auto-consolidate --dry-run
+yellow-rock-memory auto-consolidate --dry-run
 
 # Consolidate all namespaces (groups of 3+ memories)
-grey-rock-memory auto-consolidate
+yellow-rock-memory auto-consolidate
 
 # Only short-term memories, minimum 5 per group
-grey-rock-memory auto-consolidate --short-only --min-count 5
+yellow-rock-memory auto-consolidate --short-only --min-count 5
 
 # Only a specific namespace
-grey-rock-memory auto-consolidate --namespace my-project
+yellow-rock-memory auto-consolidate --namespace my-project
 ```
 
 How it works:
@@ -401,7 +401,7 @@ Use `--dry-run` first to preview what would be consolidated.
 When two memories conflict, resolve the contradiction by declaring a winner:
 
 ```bash
-grey-rock-memory resolve <winner_id> <loser_id>
+yellow-rock-memory resolve <winner_id> <loser_id>
 ```
 
 This command:
@@ -417,16 +417,16 @@ Generate and view the built-in man page:
 
 ```bash
 # View immediately
-grey-rock-memory man | man -l -
+yellow-rock-memory man | man -l -
 
 # Install system-wide
-grey-rock-memory man | sudo tee /usr/local/share/man/man1/grey-rock-memory.1 > /dev/null
+yellow-rock-memory man | sudo tee /usr/local/share/man/man1/yellow-rock-memory.1 > /dev/null
 ```
 
 ## FAQ
 
 **Q: Where is the database stored?**
-A: By default, `grey-rock-memory.db` in the current directory. Override with `--db /path/to/db` or the `GREY_ROCK_MEMORY_DB` environment variable.
+A: By default, `yellow-rock-memory.db` in the current directory. Override with `--db /path/to/db` or the `GREY_ROCK_MEMORY_DB` environment variable.
 
 **Q: Do I need to run the HTTP daemon?**
 A: No. The MCP server and CLI commands work directly against the SQLite database. The HTTP daemon is an alternative interface that adds automatic background garbage collection.

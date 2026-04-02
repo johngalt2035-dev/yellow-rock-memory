@@ -1,4 +1,4 @@
-// Grey Rock Memory — Forensic Communication Archive
+// Yellow Rock Memory — Forensic Communication Archive
 // Copyright (c) 2026 johngalt2035-dev. All rights reserved.
 // Created by johngalt2035-dev + Anthropic Claude AI Code
 //
@@ -13,10 +13,10 @@
 fn test_cli_store_and_recall() {
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-cli-test-{}.db",
+        "yellow-rock-memory-cli-test-{}.db",
         uuid::Uuid::new_v4()
     ));
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
 
     // Store
     let output = std::process::Command::new(binary)
@@ -135,10 +135,10 @@ fn test_cli_store_and_recall() {
 
 #[test]
 fn test_deduplication() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-dedup-test-{}.db",
+        "yellow-rock-memory-dedup-test-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -181,10 +181,10 @@ fn test_deduplication() {
 
 #[test]
 fn test_gc_removes_expired() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-gc-test-{}.db",
+        "yellow-rock-memory-gc-test-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -221,10 +221,10 @@ fn test_gc_removes_expired() {
 
 #[test]
 fn test_content_size_limit() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-size-test-{}.db",
+        "yellow-rock-memory-size-test-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -248,14 +248,14 @@ fn test_content_size_limit() {
 
 #[test]
 fn test_import_export_roundtrip() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db1 = dir.join(format!(
-        "grey-rock-memory-export-{}.db",
+        "yellow-rock-memory-export-{}.db",
         uuid::Uuid::new_v4()
     ));
     let db2 = dir.join(format!(
-        "grey-rock-memory-import-{}.db",
+        "yellow-rock-memory-import-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -329,10 +329,10 @@ fn test_import_export_roundtrip() {
 
 #[test]
 fn test_reject_empty_title() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-val-title-{}.db",
+        "yellow-rock-memory-val-title-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -355,10 +355,10 @@ fn test_reject_empty_title() {
 
 #[test]
 fn test_reject_bad_source() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-val-source-{}.db",
+        "yellow-rock-memory-val-source-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -383,10 +383,10 @@ fn test_reject_bad_source() {
 
 #[test]
 fn test_reject_bad_namespace() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-val-ns-{}.db",
+        "yellow-rock-memory-val-ns-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -414,10 +414,10 @@ fn test_reject_bad_namespace() {
 
 #[test]
 fn test_reject_oversized_content() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-val-size-{}.db",
+        "yellow-rock-memory-val-size-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -441,10 +441,10 @@ fn test_reject_oversized_content() {
 
 #[test]
 fn test_reject_bad_priority() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-val-prio-{}.db",
+        "yellow-rock-memory-val-prio-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -485,10 +485,10 @@ fn test_reject_bad_priority() {
 
 #[test]
 fn test_reject_bad_confidence() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-val-conf-{}.db",
+        "yellow-rock-memory-val-conf-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -531,10 +531,10 @@ fn test_reject_bad_confidence() {
 
 #[test]
 fn test_recall_priority_order() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-order-{}.db",
+        "yellow-rock-memory-order-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -602,9 +602,9 @@ fn test_recall_priority_order() {
 
 #[test]
 fn test_ttl_assignment() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
-    let db_path = dir.join(format!("grey-rock-memory-ttl-{}.db", uuid::Uuid::new_v4()));
+    let db_path = dir.join(format!("yellow-rock-memory-ttl-{}.db", uuid::Uuid::new_v4()));
 
     // Store short-term
     let output = std::process::Command::new(binary)
@@ -688,10 +688,10 @@ fn test_ttl_assignment() {
 
 #[test]
 fn test_auto_promotion() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-promote-auto-{}.db",
+        "yellow-rock-memory-promote-auto-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -757,10 +757,10 @@ fn test_auto_promotion() {
 
 #[test]
 fn test_forget_by_pattern() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-forget-{}.db",
+        "yellow-rock-memory-forget-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -836,10 +836,10 @@ fn test_forget_by_pattern() {
 
 #[test]
 fn test_namespace_isolation() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-nsiso-{}.db",
+        "yellow-rock-memory-nsiso-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -911,9 +911,9 @@ fn test_namespace_isolation() {
 
 #[test]
 fn test_link_creation() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
-    let db_path = dir.join(format!("grey-rock-memory-link-{}.db", uuid::Uuid::new_v4()));
+    let db_path = dir.join(format!("yellow-rock-memory-link-{}.db", uuid::Uuid::new_v4()));
 
     // Store two memories
     let output = std::process::Command::new(binary)
@@ -991,10 +991,10 @@ fn test_link_creation() {
 
 #[test]
 fn test_consolidation() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-consol-{}.db",
+        "yellow-rock-memory-consol-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -1081,14 +1081,166 @@ fn test_consolidation() {
     let _ = std::fs::remove_file(&db_path);
 }
 
+// --- Draft Security Tests ---
+
+#[test]
+fn test_draft_reviewer_cannot_be_contact() {
+    let dir = tempfile::tempdir().unwrap();
+    let db_path = dir.path().join("test.db");
+    let conn = yellow_rock_memory::db::open(&db_path).unwrap();
+
+    // Create a draft for contact "hostile-person"
+    let (draft_id, _hash) =
+        yellow_rock_memory::db::create_draft(&conn, "hostile-person", None, "Test draft content")
+            .unwrap();
+
+    // Attempting to approve with reviewer == contact_id should fail
+    let result = yellow_rock_memory::db::approve_draft(
+        &conn,
+        &draft_id,
+        "hostile-person",
+        Some("self-approve attempt"),
+    );
+    assert!(
+        result.is_err(),
+        "Should block contact from approving their own draft"
+    );
+
+    // Attempting to reject with reviewer == contact_id should fail
+    let result = yellow_rock_memory::db::reject_draft(
+        &conn,
+        &draft_id,
+        "hostile-person",
+        Some("self-reject attempt"),
+    );
+    assert!(
+        result.is_err(),
+        "Should block contact from rejecting their own draft"
+    );
+
+    // Case-insensitive check
+    let result = yellow_rock_memory::db::approve_draft(
+        &conn,
+        &draft_id,
+        "HOSTILE-PERSON",
+        Some("case bypass attempt"),
+    );
+    assert!(
+        result.is_err(),
+        "Should block case-insensitive contact match"
+    );
+
+    // Different reviewer should succeed
+    let result = yellow_rock_memory::db::approve_draft(
+        &conn,
+        &draft_id,
+        "principal-user",
+        Some("legitimate approval"),
+    );
+    assert!(result.is_ok(), "Principal should be able to approve");
+}
+
+#[test]
+fn test_draft_lifecycle() {
+    let dir = tempfile::tempdir().unwrap();
+    let db_path = dir.path().join("test.db");
+    let conn = yellow_rock_memory::db::open(&db_path).unwrap();
+
+    // Create
+    let (draft_id, hash) = yellow_rock_memory::db::create_draft(
+        &conn,
+        "contact-a",
+        None,
+        "Hello, the pickup is at 5pm.",
+    )
+    .unwrap();
+    assert!(!draft_id.is_empty());
+    assert!(!hash.is_empty());
+
+    // List
+    let drafts = yellow_rock_memory::db::list_drafts(
+        &conn,
+        Some("contact-a"),
+        Some("pending"),
+        None,
+        50,
+    )
+    .unwrap();
+    assert_eq!(drafts.len(), 1);
+    assert_eq!(drafts[0].status, "pending");
+
+    // Approve
+    yellow_rock_memory::db::approve_draft(&conn, &draft_id, "principal", Some("looks good"))
+        .unwrap();
+    let draft = yellow_rock_memory::db::get_draft(&conn, &draft_id)
+        .unwrap()
+        .unwrap();
+    assert_eq!(draft.status, "approved");
+
+    // Send (must match content exactly)
+    yellow_rock_memory::db::mark_draft_sent(
+        &conn,
+        &draft_id,
+        "Hello, the pickup is at 5pm.",
+        "signal",
+    )
+    .unwrap();
+    let draft = yellow_rock_memory::db::get_draft(&conn, &draft_id)
+        .unwrap()
+        .unwrap();
+    assert_eq!(draft.status, "sent");
+
+    // Verify chain
+    let verification = yellow_rock_memory::db::verify_draft_chain(&conn, &draft_id).unwrap();
+    assert!(verification.valid);
+    assert!(verification.draft_hash_valid);
+    assert!(verification.approval_hash_valid);
+    assert!(verification.sent_hash_valid);
+}
+
+#[test]
+fn test_draft_send_content_mismatch_blocked() {
+    let dir = tempfile::tempdir().unwrap();
+    let db_path = dir.path().join("test.db");
+    let conn = yellow_rock_memory::db::open(&db_path).unwrap();
+
+    let (draft_id, _) =
+        yellow_rock_memory::db::create_draft(&conn, "contact-b", None, "Original content")
+            .unwrap();
+    yellow_rock_memory::db::approve_draft(&conn, &draft_id, "principal", None).unwrap();
+
+    // Sending with different content should fail
+    let result =
+        yellow_rock_memory::db::mark_draft_sent(&conn, &draft_id, "Modified content", "signal");
+    assert!(
+        result.is_err(),
+        "Should block content that doesn't match approved draft"
+    );
+}
+
+#[test]
+fn test_draft_send_requires_approval() {
+    let dir = tempfile::tempdir().unwrap();
+    let db_path = dir.path().join("test.db");
+    let conn = yellow_rock_memory::db::open(&db_path).unwrap();
+
+    let (draft_id, _) =
+        yellow_rock_memory::db::create_draft(&conn, "contact-c", None, "Pending content").unwrap();
+
+    // Sending without approval should fail
+    let result =
+        yellow_rock_memory::db::mark_draft_sent(&conn, &draft_id, "Pending content", "signal");
+    assert!(result.is_err(), "Should block sending unapproved draft");
+}
+
 // --- Promote command ---
 
 #[test]
 fn test_promote_command() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-promote-cmd-{}.db",
+        "yellow-rock-memory-promote-cmd-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -1136,10 +1288,10 @@ fn test_promote_command() {
 
 #[test]
 fn test_namespaces_command() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-ns-cmd-{}.db",
+        "yellow-rock-memory-ns-cmd-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -1185,10 +1337,10 @@ fn test_namespaces_command() {
 
 #[test]
 fn test_unicode_handling() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-unicode-{}.db",
+        "yellow-rock-memory-unicode-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -1237,10 +1389,10 @@ fn test_unicode_handling() {
 
 #[test]
 fn test_boundary_priority_min() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-bnd-pmin-{}.db",
+        "yellow-rock-memory-bnd-pmin-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -1266,10 +1418,10 @@ fn test_boundary_priority_min() {
 
 #[test]
 fn test_boundary_priority_max() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-bnd-pmax-{}.db",
+        "yellow-rock-memory-bnd-pmax-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -1295,10 +1447,10 @@ fn test_boundary_priority_max() {
 
 #[test]
 fn test_boundary_confidence_zero() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-bnd-c0-{}.db",
+        "yellow-rock-memory-bnd-c0-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -1324,10 +1476,10 @@ fn test_boundary_confidence_zero() {
 
 #[test]
 fn test_boundary_confidence_one() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-bnd-c1-{}.db",
+        "yellow-rock-memory-bnd-c1-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -1353,10 +1505,10 @@ fn test_boundary_confidence_one() {
 
 #[test]
 fn test_boundary_max_title_length() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-bnd-tlen-{}.db",
+        "yellow-rock-memory-bnd-tlen-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -1383,10 +1535,10 @@ fn test_boundary_max_title_length() {
 
 #[test]
 fn test_export_includes_links() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-explink-{}.db",
+        "yellow-rock-memory-explink-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -1462,14 +1614,14 @@ fn test_export_includes_links() {
 
 #[test]
 fn test_import_roundtrip_count_match() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db1 = dir.join(format!(
-        "grey-rock-memory-irt-src-{}.db",
+        "yellow-rock-memory-irt-src-{}.db",
         uuid::Uuid::new_v4()
     ));
     let db2 = dir.join(format!(
-        "grey-rock-memory-irt-dst-{}.db",
+        "yellow-rock-memory-irt-dst-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -1547,10 +1699,10 @@ fn test_import_roundtrip_count_match() {
 
 #[test]
 fn test_update_via_cli() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-update-{}.db",
+        "yellow-rock-memory-update-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -1606,10 +1758,10 @@ fn test_update_via_cli() {
 
 #[test]
 fn test_stats_accuracy() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-statsacc-{}.db",
+        "yellow-rock-memory-statsacc-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -1652,10 +1804,10 @@ fn test_stats_accuracy() {
 
 #[test]
 fn test_gc_preserves_long_term() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-gckeep-{}.db",
+        "yellow-rock-memory-gckeep-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -1724,10 +1876,10 @@ fn test_gc_preserves_long_term() {
 
 #[test]
 fn test_search_with_since_future() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-since-{}.db",
+        "yellow-rock-memory-since-{}.db",
         uuid::Uuid::new_v4()
     ));
 
@@ -1777,10 +1929,10 @@ fn test_search_with_since_future() {
 
 #[test]
 fn test_health_endpoint() {
-    let binary = env!("CARGO_BIN_EXE_grey-rock-memory");
+    let binary = env!("CARGO_BIN_EXE_yellow-rock-memory");
     let dir = std::env::temp_dir();
     let db_path = dir.join(format!(
-        "grey-rock-memory-health-{}.db",
+        "yellow-rock-memory-health-{}.db",
         uuid::Uuid::new_v4()
     ));
 

@@ -81,6 +81,6 @@ If any provision of this disclaimer is held to be unenforceable, the remaining p
 
 ---
 
-*This disclaimer applies to all versions of grey-rock-memory and grey-rock-protocol, including all source code, documentation, configuration templates, and any other materials distributed as part of these projects.*
+*This disclaimer applies to all versions of yellow-rock-memory and yellow-rock-protocol, including all source code, documentation, configuration templates, and any other materials distributed as part of these projects.*
 
 *Last updated: 2026-03-31*
