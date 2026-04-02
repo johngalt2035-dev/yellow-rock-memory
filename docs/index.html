@@ -588,17 +588,51 @@
 <!-- ==================== INSTALLATION ==================== -->
 <section>
     <h2>Installation</h2>
-    <p style="color:var(--muted);margin-bottom:16px;">Two paths to get started. Pick the one that fits you. For full automation, install <a href="https://openclaw.ai">OpenClaw</a> first.</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+    <p style="color:var(--muted);margin-bottom:16px;">Three paths to get started. Pick the one that fits you.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;">
+        <div class="card" style="border-color:var(--accent);">
+            <h4 style="color:var(--accent);">Docker (Recommended)</h4>
+            <p>One command to deploy. Persistent storage, non-root, bearer token auth built in.</p>
+            <div style="background:var(--bg);border-radius:6px;padding:10px 14px;margin-top:10px;font-family:monospace;font-size:.82em;color:var(--green);overflow-x:auto;">
+                git clone https://github.com/johngalt2035-dev/yellow-rock-memory.git<br>
+                cd yellow-rock-memory<br>
+                cp .env.example .env &amp;&amp; vim .env<br>
+                docker compose up -d
+            </div>
+            <p style="margin-top:10px;font-size:.85em;"><a href="https://github.com/johngalt2035-dev/yellow-rock-memory/blob/main/DOCKER.md">Full Docker Guide &rarr;</a></p>
+        </div>
         <div class="card">
             <h4>Human Installation</h4>
-            <p>Step-by-step for macOS, Windows, Ubuntu, Fedora. <a href="https://github.com/johngalt2035-dev/yellow-rock-memory/blob/main/INSTALL.md">INSTALL.md</a></p>
+            <p>Step-by-step for macOS, Windows, Ubuntu, Fedora. Build from source with Rust toolchain.</p>
+            <p style="margin-top:10px;font-size:.85em;"><a href="https://github.com/johngalt2035-dev/yellow-rock-memory/blob/main/INSTALL.md">INSTALL.md &rarr;</a></p>
         </div>
         <div class="card">
             <h4>AI Installation</h4>
-            <p>Copy-paste one prompt into OpenClaw, Claude Code, or ChatGPT. <a href="https://github.com/johngalt2035-dev/yellow-rock-memory/blob/main/AI-INSTALL.md">AI-INSTALL.md</a></p>
+            <p>Copy-paste one prompt into OpenClaw, Claude Code, or ChatGPT.</p>
+            <p style="margin-top:10px;font-size:.85em;"><a href="https://github.com/johngalt2035-dev/yellow-rock-memory/blob/main/AI-INSTALL.md">AI-INSTALL.md &rarr;</a></p>
         </div>
     </div>
+
+    <h3 style="margin-top:28px;">Docker Environment Variables</h3>
+    <table>
+        <thead><tr><th>Variable</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td><code>GRM_API_KEY</code></td><td><strong>Yes</strong></td><td>Bearer token for draft endpoint auth. Generate: <code>openssl rand -hex 32</code></td></tr>
+            <tr><td><code>GRM_PRINCIPAL_ID</code></td><td><strong>Yes</strong></td><td>Your identity. Only this ID can approve/reject drafts.</td></tr>
+            <tr><td><code>RUST_LOG</code></td><td>No</td><td>Log level: trace, debug, info (default), warn, error</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Docker Commands</h3>
+    <table>
+        <tbody>
+            <tr><td><code>docker compose up -d</code></td><td>Start the daemon (background)</td></tr>
+            <tr><td><code>docker compose logs -f</code></td><td>Watch logs</td></tr>
+            <tr><td><code>docker compose down</code></td><td>Stop (data preserved in volume)</td></tr>
+            <tr><td><code>docker compose down -v</code></td><td>Stop and delete all data</td></tr>
+            <tr><td><code>curl localhost:9077/api/v1/health</code></td><td>Health check</td></tr>
+        </tbody>
+    </table>
 </section>
 
 <!-- ==================== SYMBIOTIC SYSTEM ==================== -->

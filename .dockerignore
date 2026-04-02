@@ -1,0 +1,10 @@
+target/
+.git/
+*.md
+docs/
+hooks/
+*.example.json
+CLAUDE.md
+LICENSE
+LEGAL_DISCLAIMER.md
+.github/
